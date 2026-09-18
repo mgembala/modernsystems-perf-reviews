@@ -138,36 +138,47 @@ const MANAGER_TOKENS = {
 // For leaders/executives: which downline manager names roll up into their view
 // in addition to their own direct reports.
 const ROLLUP = {
-  // Silva sees the full org — Gembala org + Carpenter org
+  // Ivory sees Jose + everyone under Jose
+  "Ivory, Tom": [
+    "Silva, Jose Maria",
+    "Gembala, Maureen",
+    "Iancu, Valentin","Mocanu, Petrica",
+    "Regan, John",
+    "Gordon, Jason","Herbert, Julie",
+    "Mikellides, Simon",
+    "Carpenter, James","Mattay, Mark",
+    "True, Victoria",
+    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
+    "VanderReyden, Mike","Young, Robert"
+  ],
+  // Silva sees everyone who reports to him
   "Silva, Jose Maria": [
     "Gembala, Maureen",
-    "Ivory, Tom",
-    "Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica",
+    "Iancu, Valentin","Mocanu, Petrica",
+    "Regan, John",
     "Gordon, Jason","Herbert, Julie",
+    "Mikellides, Simon",
+    "Carpenter, James","Mattay, Mark",
     "True, Victoria",
     "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
-    "VanderReyden, Mike","Young, Robert",
-    "Carpenter, James","Mattay, Mark"
+    "VanderReyden, Mike","Young, Robert"
   ],
-  // Bagharian is executive — sees the full org (same scope as Silva)
+  // Bagharian is executive — same full org view as Silva + Ivory
   "Bagharian, Sonny": [
-    "Gembala, Maureen",
     "Ivory, Tom",
-    "Silva, Jose Maria","Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica",
+    "Silva, Jose Maria",
+    "Gembala, Maureen",
+    "Iancu, Valentin","Mocanu, Petrica",
+    "Regan, John",
     "Gordon, Jason","Herbert, Julie",
+    "Mikellides, Simon",
+    "Carpenter, James","Mattay, Mark",
     "True, Victoria",
     "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
-    "VanderReyden, Mike","Young, Robert",
-    "Carpenter, James","Mattay, Mark"
-  ],
-  // Ivory sees Mikellides + Regan + everything under them
-  "Ivory, Tom":        [
-    "Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica"
+    "VanderReyden, Mike","Young, Robert"
   ],
   "Iancu, Valentin":   ["Mocanu, Petrica"],
   "True, Victoria":    [
