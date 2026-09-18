@@ -337,8 +337,12 @@ async function loadData() {
       html += renderTeamCard(ownTeam, teams[ownTeam], false);
     }
 
-    // ── Rollup sub-teams ──────────────────────────────────────────────────
-    const subs = allMgrs.filter(m => m !== ownTeam);
+    // ── Rollup sub-teams — Silva first, then alpha ─────────────────────────
+    const subs = allMgrs.filter(m => m !== ownTeam).sort((a, b) => {
+      if (a === "Silva, Jose Maria") return -1;
+      if (b === "Silva, Jose Maria") return  1;
+      return a.localeCompare(b);
+    });
     if (subs.length) {
       html += `<div class="section-title">Sub-teams (rollup)</div>`;
       subs.forEach(m => { html += renderTeamCard(m, teams[m] || [], true); });
