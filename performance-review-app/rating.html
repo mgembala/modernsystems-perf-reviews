@@ -240,7 +240,7 @@ if (!MANAGER) {
   document.getElementById("main-content").innerHTML =
     `<div class="error-banner">Access not recognised. Please use your personal link.</div>`;
 } else {
-  loadTeam();
+  fetchActiveQuarter().then(() => loadTeam());
 }
 
 // ── LOAD ──────────────────────────────────────────────────────────────────────

@@ -4,14 +4,8 @@
 const MONDAY_TOKEN = (typeof MONDAY_CONFIG !== "undefined") ? MONDAY_CONFIG.token   : "";
 const BOARD_ID     = (typeof MONDAY_CONFIG !== "undefined") ? MONDAY_CONFIG.boardId : "18394437029";
 
-// ── ACTIVE QUARTER ────────────────────────────────────────────────────────────
-// Change this one value when a new quarter starts.
-// Managers will only see and rate the active quarter's columns.
-const ACTIVE_QUARTER = "3Q 2026";
-
 // ── QUARTER → COLUMN ID MAP ───────────────────────────────────────────────────
 // Each quarter maps to its own set of Monday column IDs.
-// Historical quarters are read-only on the dashboard; only ACTIVE_QUARTER is editable.
 const QUARTERS = {
   "3Q 2026": {
     bizOutcomes: "color_mm6w9kzf",
@@ -51,9 +45,13 @@ const QUARTERS = {
   }
 };
 
+// ── CONFIG — stored in Monday board item "_CONFIG" ────────────────────────────
+const CONFIG_ITEM_ID       = "13081116629";  // Monday item ID for _CONFIG row
+const ACTIVE_QUARTER_COL   = "text_mm7aq2rf"; // text column holding the active quarter
+
 // ── STATIC COLUMN IDs (never change quarter to quarter) ───────────────────────
 const COL = {
-  status:    "color_mm795nh2",           // Active / Active_LOA / Separated
+  status:    "color_mm795nh2",
   talentId:  "text_mkkkv4c9",
   leader:    "leader_mkkkmn8x",
   manager:   "downline_manager_mkkk8yqm",
@@ -63,11 +61,48 @@ const COL = {
   evalStatus:"dropdown_mkzcttrs"
 };
 
-// Shortcut: active quarter's column IDs (used throughout for read/write)
-const QC = QUARTERS[ACTIVE_QUARTER];
-
 // Active statuses to include (Separated = excluded)
 const ACTIVE_STATUSES = ["Active", "Active_LOA"];
+
+// ── ACTIVE QUARTER STATE ──────────────────────────────────────────────────────
+// Resolved at runtime by fetchActiveQuarter(). Falls back to "3Q 2026".
+let ACTIVE_QUARTER = "3Q 2026";
+let QC             = QUARTERS[ACTIVE_QUARTER];
+
+// Fetch the active quarter from the _CONFIG item on the Monday board.
+// Must be awaited before any data load.
+async function fetchActiveQuarter() {
+  try {
+    const data = await mondayQuery(`{
+      items(ids: [${CONFIG_ITEM_ID}]) {
+        column_values(ids: ["${ACTIVE_QUARTER_COL}"]) { text }
+      }
+    }`);
+    const val = data.items?.[0]?.column_values?.[0]?.text?.trim();
+    if (val && QUARTERS[val]) {
+      ACTIVE_QUARTER = val;
+      QC             = QUARTERS[val];
+    }
+  } catch(e) {
+    console.warn("Could not fetch active quarter — using default:", ACTIVE_QUARTER);
+  }
+  return ACTIVE_QUARTER;
+}
+
+// Save a new active quarter to Monday (executive admin only).
+async function setActiveQuarter(quarter) {
+  if (!QUARTERS[quarter]) throw new Error("Unknown quarter: " + quarter);
+  await mondayQuery(`mutation {
+    change_simple_column_value(
+      board_id: ${BOARD_ID},
+      item_id:  ${CONFIG_ITEM_ID},
+      column_id: "${ACTIVE_QUARTER_COL}",
+      value: "${quarter}"
+    ) { id }
+  }`);
+  ACTIVE_QUARTER = quarter;
+  QC             = QUARTERS[quarter];
+}
 
 // ── TOKEN → MANAGER MAPPING ───────────────────────────────────────────────────
 // Each manager gets a unique unguessable token.

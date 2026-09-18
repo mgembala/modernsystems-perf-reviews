@@ -125,6 +125,16 @@
     </div>
   </div>
   <div class="header-right">
+    <div id="admin-panel" style="display:none;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:#8d8d8d;">Active quarter:</span>
+      <select id="quarter-select" onchange="changeQuarter(this.value)"
+        style="font-size:12px;font-weight:600;background:#2d2d2d;color:#fff;border:1px solid #525252;border-radius:4px;padding:5px 10px;cursor:pointer;">
+        <option value="3Q 2026">3Q 2026</option>
+        <option value="4Q 2026">4Q 2026</option>
+        <option value="1Q 2027">1Q 2027</option>
+        <option value="2Q 2027">2Q 2027</option>
+      </select>
+    </div>
     <button class="demo-btn"    id="demo-btn"    onclick="toggleDemo()">⚗ Demo Mode</button>
     <button class="refresh-btn" id="refresh-btn" onclick="loadData()">↻ Refresh</button>
   </div>
@@ -147,7 +157,31 @@ if (!MANAGER) {
   document.getElementById("main").innerHTML =
     `<div class="error-banner">Access not recognised. Please use the personal link sent to you.</div>`;
 } else {
-  loadData();
+  // Show admin panel for executives only
+  if (MANAGER.role === "executive") {
+    document.getElementById("admin-panel").style.display = "flex";
+  }
+  // Fetch the active quarter from Monday first, then load data
+  fetchActiveQuarter().then(() => {
+    document.getElementById("quarter-select").value = ACTIVE_QUARTER;
+    loadData();
+  });
+}
+
+async function changeQuarter(quarter) {
+  const btn = document.getElementById("refresh-btn");
+  btn.textContent = "Saving…";
+  btn.disabled = true;
+  try {
+    await setActiveQuarter(quarter);
+    document.getElementById("quarter-label").textContent = ACTIVE_QUARTER;
+    await loadData();
+  } catch(e) {
+    alert("Failed to update quarter: " + e.message);
+  } finally {
+    btn.textContent = "↻ Refresh";
+    btn.disabled = false;
+  }
 }
 
 // ── DEMO MODE ─────────────────────────────────────────────────────────────────
@@ -197,6 +231,11 @@ function toggleDemo() {
 }
 
 async function loadData() {
+  // Re-read active quarter in case it changed externally (e.g. another executive changed it)
+  if (!isDemoMode) await fetchActiveQuarter();
+  if (document.getElementById("quarter-select"))
+    document.getElementById("quarter-select").value = ACTIVE_QUARTER;
+
   document.getElementById("main").innerHTML =
     `<div class="loading"><div class="spinner"></div><br/>${isDemoMode ? "Loading demo data…" : "Loading your team from Monday.com…"}</div>`;
 
