@@ -150,7 +150,7 @@
   <div style="display:flex;align-items:center;gap:0;">
     <div class="ibm-logo">IBM</div>
     <div style="margin-left:12px;">
-      <div class="header-title">ModernSystems · 2026 Performance Ratings</div>
+      <div class="header-title">ModernSystems · Performance Ratings · <span id="quarter-label"></span></div>
       <div class="header-sub" id="header-sub">Loading…</div>
     </div>
   </div>
@@ -270,6 +270,7 @@ async function loadTeam() {
 
     const firstName = MANAGER.name.includes(",")
       ? MANAGER.name.split(",")[1].trim() : MANAGER.name;
+    document.getElementById("quarter-label").textContent = ACTIVE_QUARTER;
     document.getElementById("header-sub").textContent =
       `${teamKey}'s Team · ${currentTeam.length} employees`;
     document.title = `IBM · Ratings · ${teamKey}`;

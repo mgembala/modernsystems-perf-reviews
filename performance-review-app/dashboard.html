@@ -120,7 +120,7 @@
   <div style="display:flex;align-items:center;">
     <div class="ibm-logo">IBM</div>
     <div class="header-info">
-      <div class="header-title">ModernSystems · 2026 Performance Reviews</div>
+      <div class="header-title">ModernSystems · Performance Reviews · <span id="quarter-label"></span></div>
       <div class="header-sub" id="header-sub">Loading…</div>
     </div>
   </div>
@@ -232,6 +232,7 @@ async function loadData() {
 
     document.getElementById("header-sub").textContent =
       `${isDemoMode ? "⚗ DEMO · " : ""}Dashboard · ${MANAGER.name}`;
+    document.getElementById("quarter-label").textContent = ACTIVE_QUARTER;
     document.title = `IBM · Dashboard · ${firstName}`;
 
     const allEmps     = allMgrs.flatMap(m => teams[m] || []);

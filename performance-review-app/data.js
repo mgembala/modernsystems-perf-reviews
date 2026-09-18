@@ -4,24 +4,67 @@
 const MONDAY_TOKEN = (typeof MONDAY_CONFIG !== "undefined") ? MONDAY_CONFIG.token   : "";
 const BOARD_ID     = (typeof MONDAY_CONFIG !== "undefined") ? MONDAY_CONFIG.boardId : "18394437029";
 
-// Column IDs on the performance board
-const COL = {
-  status:      "color_mm795nh2",           // Active / Active_LOA / Separated
-  talentId:    "text_mkkkv4c9",
-  leader:      "leader_mkkkmn8x",
-  manager:     "downline_manager_mkkk8yqm",
-  band:        "text_mkzcwnr1",
-  country:     "dropdown_mkzctsf9",
-  isPplMgr:    "boolean_mkqssbyx",
-  pip:         "boolean_mm799jx6",         // PIP flag
-  evalStatus:  "dropdown_mkzcttrs",
-  bizOutcomes: "color_mm6w9kzf",
-  skills:      "color_mm6w8eb",
-  behaviors:   "color_mm6wdfc6",
-  rating:      "color_mm6wh443",           // Primary Performance Rating (2026)
-  concern:     "color_mm7anpsq",           // Concern, if any
-  note:        "long_text_mkwr2w6g"
+// ── ACTIVE QUARTER ────────────────────────────────────────────────────────────
+// Change this one value when a new quarter starts.
+// Managers will only see and rate the active quarter's columns.
+const ACTIVE_QUARTER = "3Q 2026";
+
+// ── QUARTER → COLUMN ID MAP ───────────────────────────────────────────────────
+// Each quarter maps to its own set of Monday column IDs.
+// Historical quarters are read-only on the dashboard; only ACTIVE_QUARTER is editable.
+const QUARTERS = {
+  "3Q 2026": {
+    bizOutcomes: "color_mm6w9kzf",
+    skills:      "color_mm6w8eb",
+    behaviors:   "color_mm6wdfc6",
+    rating:      "color_mm6wh443",
+    concern:     "color_mm7anpsq",
+    note:        "long_text_mkwr2w6g",
+    pip:         "boolean_mm799jx6"
+  },
+  "4Q 2026": {
+    bizOutcomes: "color_mm7aw5tf",
+    skills:      "color_mm7a51t3",
+    behaviors:   "color_mm7apgtx",
+    rating:      "color_mm7a8q3y",
+    concern:     "color_mm7aya03",
+    note:        "long_text_mm7a6nq",
+    pip:         "boolean_mm7a1p3v"
+  },
+  "1Q 2027": {
+    bizOutcomes: "color_mm7aj4ve",
+    skills:      "color_mm7adbmp",
+    behaviors:   "color_mm7ahsfb",
+    rating:      "color_mm7asgeb",
+    concern:     "color_mm7aam5t",
+    note:        "long_text_mm7azdat",
+    pip:         "boolean_mm7a2pbh"
+  },
+  "2Q 2027": {
+    bizOutcomes: "color_mm7a7rrd",
+    skills:      "color_mm7aac83",
+    behaviors:   "color_mm7a67tf",
+    rating:      "color_mm7aaccm",
+    concern:     "color_mm7a2jqw",
+    note:        "long_text_mm7av9q",
+    pip:         "boolean_mm7at521"
+  }
 };
+
+// ── STATIC COLUMN IDs (never change quarter to quarter) ───────────────────────
+const COL = {
+  status:    "color_mm795nh2",           // Active / Active_LOA / Separated
+  talentId:  "text_mkkkv4c9",
+  leader:    "leader_mkkkmn8x",
+  manager:   "downline_manager_mkkk8yqm",
+  band:      "text_mkzcwnr1",
+  country:   "dropdown_mkzctsf9",
+  isPplMgr:  "boolean_mkqssbyx",
+  evalStatus:"dropdown_mkzcttrs"
+};
+
+// Shortcut: active quarter's column IDs (used throughout for read/write)
+const QC = QUARTERS[ACTIVE_QUARTER];
 
 // Active statuses to include (Separated = excluded)
 const ACTIVE_STATUSES = ["Active", "Active_LOA"];
@@ -136,7 +179,12 @@ async function mondayQuery(query) {
 async function fetchTeamData(managerName) {
   const subMgrs = ROLLUP[managerName] || [];
   const allMgrs = [managerName, ...subMgrs];
-  const colIds  = Object.values(COL).map(c => `"${c}"`).join(",");
+  // Fetch both static columns and the active quarter's rating columns
+  const allColIds = [
+    ...Object.values(COL),
+    ...Object.values(QC)
+  ].map(c => `"${c}"`).join(",");
+  const colIds = allColIds;
 
   // Paginate through all items using cursor
   let allItems = [];
@@ -178,15 +226,15 @@ async function fetchTeamData(managerName) {
       band:        cv[COL.band],
       country:     cv[COL.country],
       isPplMgr:    cv[COL.isPplMgr] === "true",
-      pip:         cv[COL.pip] === "true",
+      pip:         cv[QC.pip] === "true",
       evalStatus:  cv[COL.evalStatus],
       status:      cv[COL.status],
-      bizOutcomes: cv[COL.bizOutcomes],
-      skills:      cv[COL.skills],
-      behaviors:   cv[COL.behaviors],
-      rating:      cv[COL.rating],
-      concern:     cv[COL.concern] || "",
-      note:        cv[COL.note]
+      bizOutcomes: cv[QC.bizOutcomes],
+      skills:      cv[QC.skills],
+      behaviors:   cv[QC.behaviors],
+      rating:      cv[QC.rating],
+      concern:     cv[QC.concern] || "",
+      note:        cv[QC.note]
     };
   });
 
@@ -283,13 +331,13 @@ async function saveRatings(ratings) {
   let saved = 0, failed = 0;
   for (const [itemId, r] of entries) {
     const cols = {};
-    if (r.bizOutcomes)      cols[COL.bizOutcomes] = { label: r.bizOutcomes };
-    if (r.skills)           cols[COL.skills]      = { label: r.skills };
-    if (r.behaviors)        cols[COL.behaviors]   = { label: r.behaviors };
-    if (r.rating)           cols[COL.rating]      = { label: r.rating };
-    if (r.concern)          cols[COL.concern]     = { label: r.concern };
-    if (r.note)             cols[COL.note]        = { text: r.note };
-    if (r.pip != null)      cols[COL.pip]         = { checked: r.pip ? "true" : "false" };
+    if (r.bizOutcomes)      cols[QC.bizOutcomes] = { label: r.bizOutcomes };
+    if (r.skills)           cols[QC.skills]      = { label: r.skills };
+    if (r.behaviors)        cols[QC.behaviors]   = { label: r.behaviors };
+    if (r.rating)           cols[QC.rating]      = { label: r.rating };
+    if (r.concern)          cols[QC.concern]     = { label: r.concern };
+    if (r.note)             cols[QC.note]        = { text: r.note };
+    if (r.pip != null)      cols[QC.pip]         = { checked: r.pip ? "true" : "false" };
 
     const mutation = `mutation {
       change_multiple_column_values(
