@@ -110,7 +110,7 @@ async function setActiveQuarter(quarter) {
 // Executive tokens (Gembala, Carpenter, Silva) see rollup across sub-teams.
 const MANAGER_TOKENS = {
   // ── Gembala org ──────────────────────────────────────────────────────────────
-  "gMb9xK2mPqR7vL":  { name: "Gembala, Maureen",       role: "leader"    },
+  "gMb9xK2mPqR7vL":  { name: "Gembala, Maureen",       role: "executive" },
   "jOs4nT8wQf3hX":   { name: "Silva, Jose Maria",       role: "executive" },
   "sBy7nK3mZt9wQ":   { name: "Bagharian, Sonny",        role: "executive" },
   "iTo9yF5jNq6tK":   { name: "Ivory, Tom",              role: "leader"    },
@@ -138,6 +138,20 @@ const MANAGER_TOKENS = {
 // For leaders/executives: which downline manager names roll up into their view
 // in addition to their own direct reports.
 const ROLLUP = {
+  // Gembala sees the full org — same scope as Jose + Ivory
+  "Gembala, Maureen": [
+    "Ivory, Tom",
+    "Silva, Jose Maria",
+    "Iancu, Valentin","Mocanu, Petrica",
+    "Regan, John",
+    "Gordon, Jason","Herbert, Julie",
+    "Mikellides, Simon",
+    "Carpenter, James","Mattay, Mark",
+    "True, Victoria",
+    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
+    "VanderReyden, Mike","Young, Robert"
+  ],
   // Ivory sees Jose + everyone under Jose
   "Ivory, Tom": [
     "Silva, Jose Maria",
