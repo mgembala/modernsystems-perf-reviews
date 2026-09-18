@@ -110,7 +110,7 @@ async function setActiveQuarter(quarter) {
 // Executive tokens (Gembala, Carpenter, Silva) see rollup across sub-teams.
 const MANAGER_TOKENS = {
   // ── Gembala org ──────────────────────────────────────────────────────────────
-  "gMb9xK2mPqR7vL":  { name: "Gembala, Maureen",       role: "executive" },
+  "gMb9xK2mPqR7vL":  { name: "Gembala, Maureen",       role: "leader"    },
   "jOs4nT8wQf3hX":   { name: "Silva, Jose Maria",       role: "executive" },
   "sBy7nK3mZt9wQ":   { name: "Bagharian, Sonny",        role: "executive" },
   "iTo9yF5jNq6tK":   { name: "Ivory, Tom",              role: "leader"    },
@@ -128,48 +128,19 @@ const MANAGER_TOKENS = {
   "sMe7yE1qUx4aS":   { name: "Scordos, Michelle",       role: "manager"   },
   "tRn9zF3rVy5bT":   { name: "Thompson, Ronald",        role: "manager"   },
   "vDo2aG6sWz7cU":   { name: "VanderReyden, Mike",      role: "manager"   },
-  "yRp5bH8tXa1dV":   { name: "Young, Robert",           role: "manager"   },
+  "yRp5bH8tXa1dV":   { name: "Young, Robert",           role: "leader"    },
   // ── Carpenter org ────────────────────────────────────────────────────────────
   "cJm8cI2uYb3eW":   { name: "Carpenter, James",        role: "leader"    },
-  "mTy1dJ4vZc6fX":   { name: "Mattay, Mark",            role: "leader"    },
-  "kJf3eK7wAd9gY":   { name: "KOENIG, JEFFREY",         role: "manager"   }
+  "mTy1dJ4vZc6fX":   { name: "Mattay, Mark",            role: "leader"    }
 };
 
 // ── ROLLUP RULES ─────────────────────────────────────────────────────────────
 // For leaders/executives: which downline manager names roll up into their view
 // in addition to their own direct reports.
 const ROLLUP = {
-  // Gembala sees everyone — Gembala org + Carpenter org
-  "Gembala, Maureen":  [
-    "Ivory, Tom",
-    "Silva, Jose Maria","Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica",
-    "Gordon, Jason","Herbert, Julie",
-    "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
-    "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
-    "VanderReyden, Mike","Young, Robert",
-    "Carpenter, James","Mattay, Mark","KOENIG, JEFFREY"
-  ],
-  // Ivory sees Jose + Mikellides + everything under them
-  "Ivory, Tom":        [
-    "Silva, Jose Maria","Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica"
-  ],
-  // Bagharian is executive — sees the full org (same scope as Gembala/Silva)
-  "Bagharian, Sonny": [
-    "Ivory, Tom",
-    "Silva, Jose Maria","Iancu, Valentin","Mikellides, Simon","Regan, John",
-    "Mocanu, Petrica",
-    "Gordon, Jason","Herbert, Julie",
-    "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
-    "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
-    "VanderReyden, Mike","Young, Robert",
-    "Carpenter, James","Mattay, Mark","KOENIG, JEFFREY"
-  ],
-  // Silva is executive — sees the full org (same scope as Gembala)
+  // Silva sees the full org — Gembala org + Carpenter org
   "Silva, Jose Maria": [
+    "Gembala, Maureen",
     "Ivory, Tom",
     "Iancu, Valentin","Mikellides, Simon","Regan, John",
     "Mocanu, Petrica",
@@ -178,8 +149,25 @@ const ROLLUP = {
     "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert",
-    "Wurman, David",
-    "Carpenter, James","Mattay, Mark","KOENIG, JEFFREY"
+    "Carpenter, James","Mattay, Mark"
+  ],
+  // Bagharian is executive — sees the full org (same scope as Silva)
+  "Bagharian, Sonny": [
+    "Gembala, Maureen",
+    "Ivory, Tom",
+    "Silva, Jose Maria","Iancu, Valentin","Mikellides, Simon","Regan, John",
+    "Mocanu, Petrica",
+    "Gordon, Jason","Herbert, Julie",
+    "True, Victoria",
+    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
+    "VanderReyden, Mike","Young, Robert",
+    "Carpenter, James","Mattay, Mark"
+  ],
+  // Ivory sees Mikellides + Regan + everything under them
+  "Ivory, Tom":        [
+    "Iancu, Valentin","Mikellides, Simon","Regan, John",
+    "Mocanu, Petrica"
   ],
   "Iancu, Valentin":   ["Mocanu, Petrica"],
   "True, Victoria":    [
@@ -188,7 +176,7 @@ const ROLLUP = {
     "VanderReyden, Mike","Young, Robert"
   ],
   "Gordon, Jason":     ["Herbert, Julie"],
-  "Carpenter, James":  ["Mattay, Mark","KOENIG, JEFFREY"],  // leader — sees his own directs + Mattay + Koenig
+  "Carpenter, James":  ["Mattay, Mark"],
 };
 
 // ── MONDAY API HELPER ─────────────────────────────────────────────────────────
