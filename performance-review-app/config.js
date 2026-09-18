@@ -1,0 +1,4 @@
+const MONDAY_CONFIG = {
+  token:   "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjcwMjA4MjI4MCwiYWFpIjoxMSwidWlkIjo1MDgyMzgwNSwiaWFkIjoiMjAyNi0wOS0wOVQxMzo1OTowMC4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTM1MzY5ODEsInJnbiI6InVzZTEifQ.Dy3dJ9JRoNRGKyz6rLQYek8DenFGrggdGve0oy8KzGg",
+  boardId: "18394437029"
+};
