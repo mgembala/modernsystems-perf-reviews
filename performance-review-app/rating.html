@@ -256,17 +256,15 @@ async function loadTeam() {
     currentTeam = teams[teamKey] || [];
 
     // Pre-populate ratings from what's already on the board.
-    // If Monday has "Performance Concern(s)" stored, treat it as concern=true with no primary.
     currentTeam.forEach(emp => {
-      const isConcern = emp.rating === "Performance Concern(s)";
       ratings[emp.mondayId] = {
         bizOutcomes: emp.bizOutcomes || null,
         skills:      emp.skills      || null,
         behaviors:   emp.behaviors   || null,
-        rating:      isConcern ? null : (emp.rating || null),
-        concern:     isConcern,
-        pip:         emp.pip || false,
-        note:        emp.note || ""
+        rating:      emp.rating      || null,
+        concern:     emp.concern     || "",
+        pip:         emp.pip         || false,
+        note:        emp.note        || ""
       };
     });
 
@@ -396,7 +394,7 @@ function renderRatingCell(empId, r) {
 
 // ── INTERACTIONS ──────────────────────────────────────────────────────────────
 function setRating(empId, field, value, activeClass) {
-  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, note:"" };
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:"", note:"" };
   ratings[empId][field] = ratings[empId][field] === value ? null : value;
 
   const chipSet    = field === "rating" ? RATING_CHIPS : OUTCOME_CHIPS;
@@ -422,8 +420,8 @@ function setRating(empId, field, value, activeClass) {
 }
 
 function toggleConcern(empId) {
-  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
-  ratings[empId].concern = !ratings[empId].concern;
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:"", pip:false, note:"" };
+  ratings[empId].concern = ratings[empId].concern ? "" : "Performance Concern(s)";
 
   const row = document.getElementById(`row-${empId}`);
   if (row) {
@@ -447,7 +445,7 @@ function toggleConcern(empId) {
 }
 
 function togglePip(empId) {
-  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:"", pip:false, note:"" };
   ratings[empId].pip = !ratings[empId].pip;
 
   // Update PIP toggle button
@@ -486,7 +484,7 @@ function togglePip(empId) {
 }
 
 function setNote(empId, value) {
-  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:"", pip:false, note:"" };
   ratings[empId].note = value;
   // Clear red border once note is entered for concern or PIP
   const noteEl = document.getElementById(`note-${empId}`);
@@ -562,10 +560,7 @@ function buildSavePayload() {
   return Object.fromEntries(
     Object.entries(ratings)
       .filter(([, r]) => r.bizOutcomes || r.skills || r.behaviors || r.rating || r.concern || r.pip || r.note)
-      .map(([id, r]) => [id, {
-        ...r,
-        rating: r.concern ? "Performance Concern(s)" : r.rating
-      }])
+      .map(([id, r]) => [id, { ...r }])
   );
 }
 

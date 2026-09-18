@@ -18,7 +18,8 @@ const COL = {
   bizOutcomes: "color_mm6w9kzf",
   skills:      "color_mm6w8eb",
   behaviors:   "color_mm6wdfc6",
-  rating:      "color_mm6wh443",
+  rating:      "color_mm6wh443",           // Primary Performance Rating (2026)
+  concern:     "color_mm7anpsq",           // Concern, if any
   note:        "long_text_mkwr2w6g"
 };
 
@@ -184,6 +185,7 @@ async function fetchTeamData(managerName) {
       skills:      cv[COL.skills],
       behaviors:   cv[COL.behaviors],
       rating:      cv[COL.rating],
+      concern:     cv[COL.concern] || "",
       note:        cv[COL.note]
     };
   });
@@ -221,13 +223,14 @@ function calcGlassScore(r) {
   const { bizOutcomes, skills, behaviors, rating, concern } = r;
   if (!bizOutcomes && !skills && !behaviors && !rating && !concern) return 0;
   // Concern flag pulls glass down one notch from its primary rating
-  if (concern) {
+  const hasConcern = !!concern;
+  if (hasConcern) {
     // Concern + Top → show as mixed (amber) since it's flagged
     if (rating === "Top")  return 2;
     // Concern + Core or no primary → show as concern (red-low)
     return 1;
   }
-  if (rating === "Performance Concern(s)" || rating === "Low") return 1;
+  if (rating === "Low") return 1;
   if (rating === "Not Eligible") return 1.5;
   const allMet = bizOutcomes === "Met" && skills === "Met" && behaviors === "Met";
   if (rating === "Top"  && allMet) return 4;
@@ -283,7 +286,8 @@ async function saveRatings(ratings) {
     if (r.bizOutcomes)      cols[COL.bizOutcomes] = { label: r.bizOutcomes };
     if (r.skills)           cols[COL.skills]      = { label: r.skills };
     if (r.behaviors)        cols[COL.behaviors]   = { label: r.behaviors };
-    if (r.rating)           cols[COL.rating]      = { label: r.concern ? "Performance Concern(s)" : r.rating };
+    if (r.rating)           cols[COL.rating]      = { label: r.rating };
+    if (r.concern)          cols[COL.concern]     = { label: r.concern };
     if (r.note)             cols[COL.note]        = { text: r.note };
     if (r.pip != null)      cols[COL.pip]         = { checked: r.pip ? "true" : "false" };
 
