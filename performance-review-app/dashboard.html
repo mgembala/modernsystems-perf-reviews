@@ -125,15 +125,19 @@
     </div>
   </div>
   <div class="header-right">
-    <div id="admin-panel" style="display:none;align-items:center;gap:8px;">
-      <span style="font-size:11px;color:#8d8d8d;">Active quarter:</span>
-      <select id="quarter-select" onchange="changeQuarter(this.value)"
+    <div id="quarter-panel" style="display:none;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:#8d8d8d;">Viewing:</span>
+      <select id="quarter-select" onchange="viewQuarter(this.value)"
         style="font-size:12px;font-weight:600;background:#2d2d2d;color:#fff;border:1px solid #525252;border-radius:4px;padding:5px 10px;cursor:pointer;">
         <option value="3Q 2026">3Q 2026</option>
         <option value="4Q 2026">4Q 2026</option>
         <option value="1Q 2027">1Q 2027</option>
         <option value="2Q 2027">2Q 2027</option>
       </select>
+      <button id="set-active-btn" onclick="promoteToActive()"
+        style="display:none;font-size:11px;font-weight:700;color:#161616;background:#f5c842;border:none;border-radius:4px;padding:5px 12px;cursor:pointer;white-space:nowrap;">
+        Set active for all →
+      </button>
     </div>
     <button class="demo-btn"    id="demo-btn"    onclick="toggleDemo()">⚗ Demo Mode</button>
     <button class="refresh-btn" id="refresh-btn" onclick="loadData()">↻ Refresh</button>
@@ -153,34 +157,62 @@ const MANAGER = MANAGER_TOKENS[TOKEN];
 
 let isDemoMode = false;
 
+// VIEW_QUARTER — personal browser view, never affects other users
+let VIEW_QUARTER = null;   // set after fetchActiveQuarter() resolves
+
 if (!MANAGER) {
   document.getElementById("main").innerHTML =
     `<div class="error-banner">Access not recognised. Please use the personal link sent to you.</div>`;
 } else {
-  // Show admin panel for executives only
-  if (MANAGER.role === "executive") {
-    document.getElementById("admin-panel").style.display = "flex";
+  // Show quarter panel for executives and leaders
+  if (MANAGER.role === "executive" || MANAGER.role === "leader") {
+    document.getElementById("quarter-panel").style.display = "flex";
   }
-  // Fetch the active quarter from Monday first, then load data
+  // Fetch the global active quarter from Monday, then start viewing it
   fetchActiveQuarter().then(() => {
-    document.getElementById("quarter-select").value = ACTIVE_QUARTER;
+    VIEW_QUARTER = ACTIVE_QUARTER;
+    document.getElementById("quarter-select").value = VIEW_QUARTER;
+    updateSetActiveBtn();
     loadData();
   });
 }
 
-async function changeQuarter(quarter) {
-  const btn = document.getElementById("refresh-btn");
+// Called when the user changes the dropdown — personal view only, no Monday write
+function viewQuarter(quarter) {
+  VIEW_QUARTER = quarter;
+  // Swap QC to the selected quarter's columns for this page load
+  window._viewQC = QUARTERS[quarter];
+  updateSetActiveBtn();
+  loadData();
+}
+
+// Show/hide the "Set active for all" button for executives when view ≠ live quarter
+function updateSetActiveBtn() {
+  const btn = document.getElementById("set-active-btn");
+  if (!btn) return;
+  if (MANAGER.role === "executive" && VIEW_QUARTER && VIEW_QUARTER !== ACTIVE_QUARTER) {
+    btn.style.display = "block";
+    btn.textContent = `Set ${VIEW_QUARTER} active for all →`;
+  } else {
+    btn.style.display = "none";
+  }
+}
+
+// Executive only — promote the viewed quarter to the global active quarter
+async function promoteToActive() {
+  const btn = document.getElementById("set-active-btn");
   btn.textContent = "Saving…";
   btn.disabled = true;
   try {
-    await setActiveQuarter(quarter);
-    document.getElementById("quarter-label").textContent = ACTIVE_QUARTER;
-    await loadData();
+    await setActiveQuarter(VIEW_QUARTER);
+    updateSetActiveBtn();
+    // Sync the select to confirm
+    document.getElementById("quarter-select").value = ACTIVE_QUARTER;
   } catch(e) {
-    alert("Failed to update quarter: " + e.message);
+    alert("Failed to set active quarter: " + e.message);
   } finally {
-    btn.textContent = "↻ Refresh";
     btn.disabled = false;
+    updateSetActiveBtn();
   }
 }
 
@@ -231,10 +263,16 @@ function toggleDemo() {
 }
 
 async function loadData() {
-  // Re-read active quarter in case it changed externally (e.g. another executive changed it)
-  if (!isDemoMode) await fetchActiveQuarter();
-  if (document.getElementById("quarter-select"))
-    document.getElementById("quarter-select").value = ACTIVE_QUARTER;
+  // Managers always see the live active quarter — fetch it fresh each time
+  // Executives/leaders use their personal VIEW_QUARTER selection
+  if (MANAGER.role === "manager") {
+    if (!isDemoMode) await fetchActiveQuarter();
+    VIEW_QUARTER = ACTIVE_QUARTER;
+  }
+
+  // Temporarily override QC to the viewed quarter for this load
+  const loadQC = QUARTERS[VIEW_QUARTER] || QC;
+  window._viewQC = loadQC;
 
   document.getElementById("main").innerHTML =
     `<div class="loading"><div class="spinner"></div><br/>${isDemoMode ? "Loading demo data…" : "Loading your team from Monday.com…"}</div>`;
@@ -271,7 +309,7 @@ async function loadData() {
 
     document.getElementById("header-sub").textContent =
       `${isDemoMode ? "⚗ DEMO · " : ""}Dashboard · ${MANAGER.name}`;
-    document.getElementById("quarter-label").textContent = ACTIVE_QUARTER;
+    document.getElementById("quarter-label").textContent = VIEW_QUARTER || ACTIVE_QUARTER;
     document.title = `IBM · Dashboard · ${firstName}`;
 
     const allEmps     = allMgrs.flatMap(m => teams[m] || []);

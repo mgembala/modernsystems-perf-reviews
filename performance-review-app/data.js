@@ -214,10 +214,12 @@ async function mondayQuery(query) {
 async function fetchTeamData(managerName) {
   const subMgrs = ROLLUP[managerName] || [];
   const allMgrs = [managerName, ...subMgrs];
-  // Fetch both static columns and the active quarter's rating columns
+  // Use the view-overridden quarter columns if set (exec/leader browsing history),
+  // otherwise fall back to the global active quarter columns.
+  const _qc = (typeof window !== "undefined" && window._viewQC) || QC;
   const allColIds = [
     ...Object.values(COL),
-    ...Object.values(QC)
+    ...Object.values(_qc)
   ].map(c => `"${c}"`).join(",");
   const colIds = allColIds;
 
@@ -261,15 +263,15 @@ async function fetchTeamData(managerName) {
       band:        cv[COL.band],
       country:     cv[COL.country],
       isPplMgr:    cv[COL.isPplMgr] === "true",
-      pip:         cv[QC.pip] === "true",
+      pip:         cv[_qc.pip] === "true",
       evalStatus:  cv[COL.evalStatus],
       status:      cv[COL.status],
-      bizOutcomes: cv[QC.bizOutcomes],
-      skills:      cv[QC.skills],
-      behaviors:   cv[QC.behaviors],
-      rating:      cv[QC.rating],
-      concern:     cv[QC.concern] || "",
-      note:        cv[QC.note]
+      bizOutcomes: cv[_qc.bizOutcomes],
+      skills:      cv[_qc.skills],
+      behaviors:   cv[_qc.behaviors],
+      rating:      cv[_qc.rating],
+      concern:     cv[_qc.concern] || "",
+      note:        cv[_qc.note]
     };
   });
 
