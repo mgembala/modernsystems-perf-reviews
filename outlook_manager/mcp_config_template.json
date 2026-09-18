@@ -1,0 +1,37 @@
+# Outlook MCP Server — Bob Integration
+#
+# This file configures a lightweight MCP server that exposes your
+# outlook_manager tools directly to Bob, so Bob can read, summarise,
+# file, and reply to your emails in any conversation.
+#
+# Prerequisites
+# ─────────────
+# 1. Python 3.11+ installed
+# 2. pip install -r outlook_manager/requirements.txt
+# 3. Copy .env.example → .env and fill in your Azure app credentials
+# 4. Register an app in Microsoft Entra:
+#    https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps
+#    Required API permissions (delegated):
+#      Mail.ReadWrite  Mail.Send
+#
+# Usage
+# ─────
+# Place this file at:
+#   Workspace-only:  .bob/mcp.json   (this project)
+#   Global (all workspaces): ~/.bob/settings/mcp.json
+#
+# Bob hot-reloads MCP config on save — no restart needed.
+
+{
+  "mcpServers": {
+    "outlook-manager": {
+      "command": "python",
+      "args": ["-m", "outlook_mcp_server"],
+      "env": {
+        "AZURE_CLIENT_ID": "REPLACE_WITH_YOUR_CLIENT_ID",
+        "AZURE_TENANT_ID": "REPLACE_WITH_YOUR_TENANT_ID"
+      },
+      "timeout": 30000
+    }
+  }
+}

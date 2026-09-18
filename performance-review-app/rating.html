@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IBM ModernSystems · Performance Ratings</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1f2328; }
+
+  /* ── Header ── */
+  .header { background: #161616; color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .ibm-logo { font-size: 20px; font-weight: 700; letter-spacing: -1px; }
+  .header-title { font-size: 14px; font-weight: 600; }
+  .header-sub   { font-size: 11px; color: #8d8d8d; margin-top: 1px; }
+  .save-btn  { background: #0f62fe; color: #fff; border: none; border-radius: 4px; padding: 8px 22px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .save-btn:hover    { background: #0050e6; }
+  .save-btn:disabled { background: #525252; cursor: not-allowed; }
+  .back-btn  { font-size: 12px; color: #8d8d8d; background: none; border: 1px solid #393939; border-radius: 4px; padding: 6px 14px; cursor: pointer; margin-right: 10px; }
+  .back-btn:hover { color: #fff; border-color: #6f6f6f; }
+
+  /* ── Progress bar ── */
+  .toolbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .toolbar-title { font-size: 13px; font-weight: 600; color: #1f2328; }
+  .toolbar-sub   { font-size: 11px; color: #57606a; margin-top: 1px; }
+  .progress-wrap  { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .progress-label { font-size: 12px; color: #57606a; white-space: nowrap; }
+  .progress-track { width: 140px; height: 8px; background: #f0f2f5; border-radius: 4px; }
+  .progress-fill  { height: 100%; border-radius: 4px; background: #198038; transition: width .3s; }
+  .progress-pct   { font-size: 12px; font-weight: 700; color: #198038; min-width: 36px; }
+
+  /* ── Legend ── */
+  .legend { background: #f7f8fa; border-bottom: 1px solid #e5e7eb; padding: 8px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .legend-title { font-size: 11px; font-weight: 600; color: #57606a; text-transform: uppercase; letter-spacing: .06em; }
+  .leg-items { display: flex; gap: 16px; flex-wrap: wrap; }
+  .leg-item  { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #57606a; }
+  .leg-dot   { width: 10px; height: 10px; border-radius: 2px; }
+  .dot-top     { background: #198038; }
+  .dot-core    { background: #0f62fe; }
+  .dot-low     { background: #da1e28; }
+  .dot-concern { background: #f59e0b; }
+  .dot-met     { background: #0f62fe; }
+  .dot-notmet  { background: #da1e28; }
+  .dot-hold    { background: #8d8d8d; }
+
+  /* ── Table ── */
+  .main { padding: 20px 28px; }
+  .team-header { background: #161616; color: #fff; padding: 10px 16px; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .team-name { font-size: 14px; font-weight: 700; }
+  .team-meta { font-size: 11px; color: #8d8d8d; }
+  .team-stats { display: flex; gap: 16px; }
+  .team-stat  { font-size: 11px; color: #c6c6c6; }
+  .team-stat span { font-weight: 700; color: #fff; }
+
+  .rating-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; margin-bottom: 28px; }
+  .rating-table thead tr { background: #f7f8fa; }
+  .rating-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #57606a; padding: 9px 12px; border-bottom: 2px solid #e5e7eb; text-align: left; white-space: nowrap; }
+  .rating-table th.center { text-align: center; }
+  .rating-table td { padding: 7px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+  .rating-table tr:last-child td { border-bottom: none; }
+  .rating-table tr:hover td { background: #fafbff; }
+  .rating-table tr.row-complete td { background: #f0fdf4; }
+  .rating-table tr.row-complete:hover td { background: #dcfce7; }
+  .rating-table tr.row-loa td { background: #fffbeb; }
+
+  .emp-name { font-size: 13px; font-weight: 600; color: #1f2328; }
+  .emp-meta  { font-size: 11px; color: #57606a; margin-top: 1px; }
+  .mgr-tag   { display: inline-block; font-size: 10px; background: #ede9fe; color: #5b21b6; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; }
+  .loa-tag   { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; }
+  .pip-tag   { display: inline-block; font-size: 10px; background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 8px; font-weight: 700; margin-left: 4px; border: 1px solid #fca5a5; }
+
+  /* ── PIP toggle ── */
+  .pip-toggle { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; cursor: pointer; user-select: none; border: 1.5px solid #e5e7eb; background: #fff; color: #9ca3af; transition: all .15s; white-space: nowrap; }
+  .pip-toggle:hover { border-color: #fca5a5; color: #dc2626; }
+  .pip-toggle.pip-active { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+  .rating-table tr.row-pip td { background: #fff5f5; }
+  .rating-table tr.row-pip:hover td { background: #fee2e2; }
+  .rating-table tr.row-warn td { background: #fffbeb; }
+  .rating-table tr.row-warn:hover td { background: #fef3c7; }
+
+  /* ── Contradiction warning ── */
+  .warn-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 2px 7px; border-radius: 8px; white-space: nowrap; margin-top: 3px; }
+
+  /* ── Confirmation modal ── */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 9998; display: none; align-items: center; justify-content: center; }
+  .modal-backdrop.show { display: flex; }
+  .modal-box { background: #fff; border-radius: 8px; padding: 28px 32px; max-width: 480px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+  .modal-title { font-size: 15px; font-weight: 700; color: #1f2328; margin-bottom: 8px; }
+  .modal-body  { font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 20px; }
+  .modal-body ul { margin: 10px 0 0 18px; }
+  .modal-body li { margin-bottom: 4px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-btn-cancel  { background: #fff; border: 1px solid #d1d5db; border-radius: 4px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151; }
+  .modal-btn-cancel:hover  { background: #f9fafb; }
+  .modal-btn-proceed { background: #f59e0b; border: none; border-radius: 4px; padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
+  .modal-btn-proceed:hover { background: #d97706; }
+
+  /* ── Chips ── */
+  .chip-group { display: flex; gap: 4px; flex-wrap: nowrap; }
+  .chip { border: 1.5px solid #e5e7eb; border-radius: 4px; padding: 4px 9px; font-size: 11px; font-weight: 600; cursor: pointer; background: #fff; color: #57606a; transition: all .1s; white-space: nowrap; user-select: none; }
+  .chip:hover { border-color: #9ca3af; color: #1f2328; background: #f9fafb; }
+  .chip.active-top     { background: #198038; border-color: #198038; color: #fff; }
+  .chip.active-core    { background: #0f62fe; border-color: #0f62fe; color: #fff; }
+  .chip.active-low     { background: #da1e28; border-color: #da1e28; color: #fff; }
+  .chip.active-concern { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+  .chip.active-nelig   { background: #8d8d8d; border-color: #8d8d8d; color: #fff; }
+  .chip.active-met     { background: #0f62fe; border-color: #0f62fe; color: #fff; }
+  .chip.active-notmet  { background: #da1e28; border-color: #da1e28; color: #fff; }
+  .chip.active-hold    { background: #8d8d8d; border-color: #8d8d8d; color: #fff; }
+
+  /* ── Row indicator ── */
+  .row-indicator { width: 6px; min-width: 6px; padding: 0 !important; }
+  .ind-dot      { width: 6px; height: 100%; min-height: 36px; display: block; }
+  .ind-complete { background: #198038; }
+  .ind-partial  { background: #f59e0b; }
+  .ind-empty    { background: #e5e7eb; }
+
+  /* ── Eval status badge ── */
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-comp { background: #dcfce7; color: #166534; }
+  .badge-pen  { background: #fef3c7; color: #92400e; }
+  .badge-none { background: #f3f4f6; color: #6b7280; }
+
+  /* ── Note input ── */
+  .note-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 4px; padding: 5px 8px; font-size: 12px; font-family: inherit; color: #1f2328; resize: none; min-width: 140px; background: #fff; transition: border .15s; }
+  .note-input:focus { outline: none; border-color: #0f62fe; }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 28px; right: 28px; background: #161616; color: #fff; padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: 500; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+  .toast.show    { display: block; }
+  .toast.success { background: #198038; }
+  .toast.error   { background: #da1e28; }
+
+  /* ── Loading/Error ── */
+  .loading { text-align: center; padding: 60px 20px; color: #57606a; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #0f62fe; border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-banner { background: #fff1f0; border: 1px solid #fca5a5; border-radius: 6px; padding: 14px 18px; margin: 20px 28px; font-size: 13px; color: #991b1b; }
+
+  @media (max-width: 900px) {
+    .main { padding: 14px; }
+    .chip { padding: 4px 6px; font-size: 10px; }
+    .toolbar { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:0;">
+    <div class="ibm-logo">IBM</div>
+    <div style="margin-left:12px;">
+      <div class="header-title">ModernSystems · 2026 Performance Ratings</div>
+      <div class="header-sub" id="header-sub">Loading…</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div id="save-status" style="font-size:11px;color:#8d8d8d;"></div>
+    <button class="back-btn" onclick="goBack()">← Dashboard</button>
+    <button class="save-btn" id="save-btn" onclick="saveAll()" disabled>Save to Monday.com</button>
+  </div>
+</div>
+
+<div class="toolbar" id="toolbar" style="display:none;">
+  <div>
+    <div class="toolbar-title" id="toolbar-title"></div>
+    <div class="toolbar-sub" id="toolbar-sub"></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">Team completion</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-pct" id="progress-pct">0%</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-title">Rating key</div>
+  <div class="leg-items">
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-right:4px;">Performance:</div>
+    <div class="leg-item"><div class="leg-dot dot-top"></div>Top</div>
+    <div class="leg-item"><div class="leg-dot dot-core"></div>Core</div>
+    <div class="leg-item"><div class="leg-dot dot-low"></div>Low</div>
+    <div class="leg-item"><div class="leg-dot dot-hold"></div>Not Eligible</div>
+    <div class="leg-item"><div class="leg-dot dot-concern"></div>+ Concern (addendum)</div>
+    <div style="border-left:1px solid #e5e7eb;height:14px;margin:0 4px;"></div>
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-right:4px;">Outcomes / Skills / Behaviors:</div>
+    <div class="leg-item"><div class="leg-dot dot-met"></div>Met</div>
+    <div class="leg-item"><div class="leg-dot dot-notmet"></div>Not Met</div>
+  </div>
+</div>
+
+<div class="main" id="main-content">
+  <div class="loading"><div class="spinner"></div><br/>Loading team from Monday.com…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Contradiction confirmation modal -->
+<div class="modal-backdrop" id="warn-modal">
+  <div class="modal-box">
+    <div class="modal-title">⚠ Inconsistent Ratings Detected</div>
+    <div class="modal-body" id="warn-modal-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel"  onclick="closeWarnModal()">← Review Ratings</button>
+      <button class="modal-btn-proceed" onclick="proceedSave()">Save Anyway →</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+// ── CHIP DEFINITIONS ──────────────────────────────────────────────────────────
+// Outcomes: Met / Not Met only (On Hold removed)
+const OUTCOME_CHIPS = [
+  { label: "Met",     value: "Met",     cls: "active-met"    },
+  { label: "Not Met", value: "Not Met", cls: "active-notmet" }
+];
+// Primary performance rating: Top / Core / Low / Not Eligible (pick one)
+const RATING_CHIPS = [
+  { label: "Top",          value: "Top",          cls: "active-top"   },
+  { label: "Core",         value: "Core",         cls: "active-core"  },
+  { label: "Low",          value: "Low",          cls: "active-low"   },
+  { label: "Not Eligible", value: "Not Eligible", cls: "active-nelig" }
+];
+// Concern is a separate addendum toggle — can combine with any primary rating
+// When concern=true, Monday receives "Performance Concern(s)" in the rating column
+// and a note is required before saving.
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const TOKEN      = new URLSearchParams(window.location.search).get("token");
+const TEAM_PARAM = decodeURIComponent(new URLSearchParams(window.location.search).get("team") || "");
+const MANAGER    = MANAGER_TOKENS[TOKEN];
+
+let currentTeam  = [];   // array of employee objects
+let ratings      = {};   // { [mondayId]: { bizOutcomes, skills, behaviors, rating, concern, pip, note } }
+let pendingSave  = null; // toSave payload held while user reviews contradiction modal
+
+if (!MANAGER) {
+  document.getElementById("main-content").innerHTML =
+    `<div class="error-banner">Access not recognised. Please use your personal link.</div>`;
+} else {
+  loadTeam();
+}
+
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+async function loadTeam() {
+  try {
+    const { teams } = await fetchTeamData(MANAGER.name);
+
+    // Determine which team to show — could be own team or a rollup sub-team
+    const teamKey = Object.keys(teams).find(k =>
+      k.toLowerCase() === TEAM_PARAM.toLowerCase()
+    ) || MANAGER.name;
+
+    currentTeam = teams[teamKey] || [];
+
+    // Pre-populate ratings from what's already on the board.
+    // If Monday has "Performance Concern(s)" stored, treat it as concern=true with no primary.
+    currentTeam.forEach(emp => {
+      const isConcern = emp.rating === "Performance Concern(s)";
+      ratings[emp.mondayId] = {
+        bizOutcomes: emp.bizOutcomes || null,
+        skills:      emp.skills      || null,
+        behaviors:   emp.behaviors   || null,
+        rating:      isConcern ? null : (emp.rating || null),
+        concern:     isConcern,
+        pip:         emp.pip || false,
+        note:        emp.note || ""
+      };
+    });
+
+    const firstName = MANAGER.name.includes(",")
+      ? MANAGER.name.split(",")[1].trim() : MANAGER.name;
+    document.getElementById("header-sub").textContent =
+      `${teamKey}'s Team · ${currentTeam.length} employees`;
+    document.title = `IBM · Ratings · ${teamKey}`;
+
+    document.getElementById("toolbar-title").textContent = `${teamKey}'s Team`;
+    document.getElementById("toolbar-sub").textContent =
+      `2026 Performance Ratings · ${currentTeam.length} active employees`;
+    document.getElementById("toolbar").style.display = "flex";
+    document.getElementById("save-btn").disabled = false;
+
+    renderTable(teamKey);
+    updateProgress();
+
+  } catch(e) {
+    document.getElementById("main-content").innerHTML =
+      `<div class="error-banner">Failed to load: ${e.message}<br/><button onclick="loadTeam()" style="margin-top:8px;padding:6px 14px;cursor:pointer;">Retry</button></div>`;
+  }
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+function renderTable(teamName) {
+  const total    = currentTeam.length;
+  const complete = currentTeam.filter(e => isComplete(e.mondayId)).length;
+
+  let html = `
+    <div class="team-header">
+      <div>
+        <div class="team-name">${teamName}'s Team</div>
+        <div class="team-meta">2026 Performance Ratings · ${total} active employees</div>
+      </div>
+      <div class="team-stats">
+        <div class="team-stat">Total: <span>${total}</span></div>
+        <div class="team-stat" id="stat-rated">Rated: <span>${complete}</span></div>
+        <div class="team-stat" id="stat-remaining">Remaining: <span>${total - complete}</span></div>
+      </div>
+    </div>
+    <table class="rating-table">
+      <thead>
+        <tr>
+          <th class="row-indicator"></th>
+          <th>Employee</th>
+          <th class="center">Health</th>
+          <th>Business Outcomes</th>
+          <th>Skills</th>
+          <th>Behaviors</th>
+          <th>Performance Rating</th>
+          <th class="center">PIP</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  currentTeam.forEach(emp => {
+    const r        = ratings[emp.mondayId];
+    const complete = isComplete(emp.mondayId);
+    const partial  = isPartial(emp.mondayId);
+    const indCls   = complete ? "ind-complete" : partial ? "ind-partial" : "ind-empty";
+    const pipOn    = r && r.pip;
+    const warn     = calcContradiction(r);
+    const rowCls   = pipOn  ? "row-pip"
+                   : warn   ? "row-warn"
+                   : complete ? "row-complete"
+                   : emp.status === "Active_LOA" ? "row-loa" : "";
+
+    const loaTag  = emp.status === "Active_LOA" ? `<span class="loa-tag">LOA</span>` : "";
+    const mgrTag  = emp.isPplMgr ? `<span class="mgr-tag">Manager</span>` : "";
+    const pipTag  = pipOn ? `<span class="pip-tag">PIP</span>` : "";
+
+    html += `<tr class="${rowCls}" id="row-${emp.mondayId}">
+      <td class="row-indicator"><div class="ind-dot ${indCls}" id="ind-${emp.mondayId}"></div></td>
+      <td>
+        <div class="emp-name">${emp.name}${mgrTag}${loaTag}${pipTag}</div>
+        <div class="emp-meta">${emp.band || ""}${emp.band && emp.country ? " · " : ""}${emp.country || ""}</div>
+        <div class="warn-badge" id="warn-${emp.mondayId}" style="display:${warn ? "inline-flex" : "none"};">⚠ ${warn || ""}</div>
+      </td>
+      <td style="text-align:center;" id="glass-${emp.mondayId}">${renderGlass(calcGlassScore(r), 34, 42)}</td>
+      <td>${renderChips(emp.mondayId, "bizOutcomes", OUTCOME_CHIPS, r.bizOutcomes)}</td>
+      <td>${renderChips(emp.mondayId, "skills",      OUTCOME_CHIPS, r.skills)}</td>
+      <td>${renderChips(emp.mondayId, "behaviors",   OUTCOME_CHIPS, r.behaviors)}</td>
+      <td>${renderRatingCell(emp.mondayId, r)}</td>
+      <td style="text-align:center;">
+        <div class="pip-toggle ${pipOn ? "pip-active" : ""}" id="pip-${emp.mondayId}"
+             onclick="togglePip('${emp.mondayId}')">
+          ${pipOn ? "🚩 PIP" : "＋ PIP"}
+        </div>
+      </td>
+      <td><textarea class="note-input" rows="1"
+            id="note-${emp.mondayId}"
+            placeholder="${r.concern ? "Required — explain concern…" : r.pip ? "Required — describe PIP…" : "Optional note…"}"
+            oninput="setNote('${emp.mondayId}', this.value)">${r.note || ""}</textarea></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  document.getElementById("main-content").innerHTML = html;
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function renderChips(empId, field, chips, currentVal) {
+  return `<div class="chip-group">` +
+    chips.map(c => {
+      const active = currentVal === c.value;
+      return `<div class="chip ${active ? c.cls : ''}"
+        onclick="setRating('${empId}','${field}','${c.value}','${c.cls}')">${c.label}</div>`;
+    }).join("") + `</div>`;
+}
+
+// Renders the full Performance Rating cell:
+// Primary chips (Top/Core/Low/Not Eligible) + separate Concern toggle below
+function renderRatingCell(empId, r) {
+  const concernActive = r && r.concern;
+  const concernCls    = concernActive ? "chip active-concern" : "chip";
+  const noteEl        = document.getElementById(`note-${empId}`);
+  return `<div>
+    <div id="primary-chips-${empId}">${renderChips(empId, "rating", RATING_CHIPS, r ? r.rating : null)}</div>
+    <div style="margin-top:4px;">
+      <div class="${concernCls}" style="font-size:10px;"
+           onclick="toggleConcern('${empId}')">+ Concern</div>
+    </div>
+  </div>`;
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────────────
+function setRating(empId, field, value, activeClass) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, note:"" };
+  ratings[empId][field] = ratings[empId][field] === value ? null : value;
+
+  const chipSet    = field === "rating" ? RATING_CHIPS : OUTCOME_CHIPS;
+  const fieldIndex = { bizOutcomes:3, skills:4, behaviors:5, rating:6 };
+  const row  = document.getElementById(`row-${empId}`);
+  if (!row) return;
+
+  if (field === "rating") {
+    // Re-render the whole rating cell so concern toggle stays
+    const cell = row.querySelectorAll("td")[fieldIndex.rating];
+    if (cell) cell.innerHTML = renderRatingCell(empId, ratings[empId]);
+  } else {
+    const cell = row.querySelectorAll("td")[fieldIndex[field]];
+    if (cell) cell.innerHTML = renderChips(empId, field, chipSet, ratings[empId][field]);
+  }
+
+  // Update the live water glass for this row
+  const glassCell = document.getElementById(`glass-${empId}`);
+  if (glassCell) glassCell.innerHTML = renderGlass(calcGlassScore(ratings[empId]), 34, 42);
+
+  updateRowIndicator(empId);
+  updateProgress();
+}
+
+function toggleConcern(empId) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
+  ratings[empId].concern = !ratings[empId].concern;
+
+  const row = document.getElementById(`row-${empId}`);
+  if (row) {
+    const cell = row.querySelectorAll("td")[6];
+    if (cell) cell.innerHTML = renderRatingCell(empId, ratings[empId]);
+  }
+
+  const noteEl = document.getElementById(`note-${empId}`);
+  if (noteEl) {
+    noteEl.placeholder = ratings[empId].concern ? "Required — explain concern…"
+                       : ratings[empId].pip     ? "Required — describe PIP…"
+                       : "Optional note…";
+    noteEl.style.borderColor = (ratings[empId].concern && !ratings[empId].note) ? "#dc2626" : "";
+  }
+
+  const glassCell = document.getElementById(`glass-${empId}`);
+  if (glassCell) glassCell.innerHTML = renderGlass(calcGlassScore(ratings[empId]), 34, 42);
+
+  updateRowIndicator(empId);
+  updateProgress();
+}
+
+function togglePip(empId) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
+  ratings[empId].pip = !ratings[empId].pip;
+
+  // Update PIP toggle button
+  const pipEl = document.getElementById(`pip-${empId}`);
+  if (pipEl) {
+    pipEl.className = `pip-toggle ${ratings[empId].pip ? "pip-active" : ""}`;
+    pipEl.innerHTML = ratings[empId].pip ? "🚩 PIP" : "＋ PIP";
+  }
+
+  // Update name tag in employee cell
+  const row = document.getElementById(`row-${empId}`);
+  if (row) {
+    const emp    = currentTeam.find(e => e.mondayId === empId);
+    const pipOn  = ratings[empId].pip;
+    const loaTag = emp && emp.status === "Active_LOA" ? `<span class="loa-tag">LOA</span>` : "";
+    const mgrTag = emp && emp.isPplMgr ? `<span class="mgr-tag">Manager</span>` : "";
+    const pipTag = pipOn ? `<span class="pip-tag">PIP</span>` : "";
+    const nameEl = row.querySelector(".emp-name");
+    if (nameEl) nameEl.innerHTML = `${emp ? emp.name : ""}${mgrTag}${loaTag}${pipTag}`;
+
+    // Update row background
+    const loa = emp && emp.status === "Active_LOA";
+    row.className = pipOn ? "row-pip"
+                  : isComplete(empId) ? "row-complete"
+                  : loa ? "row-loa" : "";
+  }
+
+  // Note becomes required when PIP is on
+  const noteEl = document.getElementById(`note-${empId}`);
+  if (noteEl) {
+    noteEl.placeholder = ratings[empId].concern ? "Required — explain concern…"
+                       : ratings[empId].pip     ? "Required — describe PIP…"
+                       : "Optional note…";
+    noteEl.style.borderColor = (ratings[empId].pip && !ratings[empId].note) ? "#dc2626" : "";
+  }
+}
+
+function setNote(empId, value) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes:null, skills:null, behaviors:null, rating:null, concern:false, pip:false, note:"" };
+  ratings[empId].note = value;
+  // Clear red border once note is entered for concern or PIP
+  const noteEl = document.getElementById(`note-${empId}`);
+  if (noteEl && (ratings[empId].concern || ratings[empId].pip)) {
+    noteEl.style.borderColor = value.trim() ? "" : "#dc2626";
+  }
+}
+
+function updateRowIndicator(empId) {
+  const ind  = document.getElementById(`ind-${empId}`);
+  const row  = document.getElementById(`row-${empId}`);
+  const emp  = currentTeam.find(e => e.mondayId === empId);
+  const r    = ratings[empId];
+  const warn = calcContradiction(r);
+  const pip  = r && r.pip;
+  const loa  = emp && emp.status === "Active_LOA";
+
+  if (ind) ind.className = `ind-dot ${isComplete(empId) ? "ind-complete" : isPartial(empId) ? "ind-partial" : "ind-empty"}`;
+
+  if (row) {
+    row.className = pip        ? "row-pip"
+                  : warn       ? "row-warn"
+                  : isComplete(empId) ? "row-complete"
+                  : loa        ? "row-loa" : "";
+  }
+
+  // Show/hide inline warning badge below the employee name
+  const warnEl = document.getElementById(`warn-${empId}`);
+  if (warnEl) {
+    warnEl.style.display = warn ? "inline-flex" : "none";
+    warnEl.textContent   = warn ? `⚠ ${warn}` : "";
+  }
+}
+
+function updateProgress() {
+  const total    = currentTeam.length;
+  const complete = currentTeam.filter(e => isComplete(e.mondayId)).length;
+  const pct      = total ? Math.round((complete / total) * 100) : 0;
+  const fill     = document.getElementById("progress-fill");
+  const pctEl    = document.getElementById("progress-pct");
+  if (fill)  fill.style.width = pct + "%";
+  if (pctEl) pctEl.textContent = pct + "%";
+
+  const statRated     = document.getElementById("stat-rated");
+  const statRemaining = document.getElementById("stat-remaining");
+  if (statRated)     statRated.querySelector("span").textContent     = complete;
+  if (statRemaining) statRemaining.querySelector("span").textContent = total - complete;
+}
+
+function isComplete(empId) {
+  const r = ratings[empId];
+  return r && r.bizOutcomes && r.skills && r.behaviors && r.rating;
+}
+function isPartial(empId) {
+  const r = ratings[empId];
+  return r && (r.bizOutcomes || r.skills || r.behaviors || r.rating || r.concern) && !isComplete(empId);
+}
+
+// Returns a contradiction message string, or null if ratings are consistent.
+//   • All Met + Low rating        → "All outcomes Met but rated Low"
+//   • Any Not Met + Top rating    → "Has Not Met outcome but rated Top"
+function calcContradiction(r) {
+  if (!r || !r.rating) return null;
+  const allMet   = r.bizOutcomes === "Met" && r.skills === "Met" && r.behaviors === "Met";
+  const anyNotMet = r.bizOutcomes === "Not Met" || r.skills === "Not Met" || r.behaviors === "Not Met";
+  if (allMet   && r.rating === "Low")  return "All outcomes Met — but rated Low";
+  if (anyNotMet && r.rating === "Top") return "Has a Not Met outcome — but rated Top";
+  return null;
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+function buildSavePayload() {
+  return Object.fromEntries(
+    Object.entries(ratings)
+      .filter(([, r]) => r.bizOutcomes || r.skills || r.behaviors || r.rating || r.concern || r.pip || r.note)
+      .map(([id, r]) => [id, {
+        ...r,
+        rating: r.concern ? "Performance Concern(s)" : r.rating
+      }])
+  );
+}
+
+async function saveAll() {
+  const btn    = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  status.textContent = "";
+
+  // ── Concern / PIP: note is required (hard block) ─────────────────────────────
+  const missingNotes = currentTeam.filter(e => {
+    const r = ratings[e.mondayId];
+    return r && (r.concern || r.pip) && !r.note?.trim();
+  });
+  if (missingNotes.length) {
+    missingNotes.forEach(e => {
+      const noteEl = document.getElementById(`note-${e.mondayId}`);
+      if (noteEl) {
+        noteEl.style.borderColor = "#dc2626";
+        noteEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+    showToast(`Note required for ${missingNotes.length} employee${missingNotes.length > 1 ? "s" : ""} flagged with Concern or PIP.`, "error");
+    btn.disabled = false;
+    btn.textContent = "Save to Monday.com";
+    return;
+  }
+
+  const toSave = buildSavePayload();
+  if (!Object.keys(toSave).length) {
+    showToast("No ratings to save yet — select at least one rating.", "error");
+    btn.disabled = false;
+    btn.textContent = "Save to Monday.com";
+    return;
+  }
+
+  // ── Contradiction check: warn but allow proceed ───────────────────────────────
+  const contradictions = currentTeam.filter(e => {
+    const r = ratings[e.mondayId];
+    return calcContradiction(r);
+  });
+  if (contradictions.length) {
+    pendingSave = toSave;
+    const items = contradictions.map(e =>
+      `<li><strong>${e.name}</strong> — ${calcContradiction(ratings[e.mondayId])}</li>`
+    ).join("");
+    document.getElementById("warn-modal-body").innerHTML =
+      `The following ${contradictions.length} employee${contradictions.length > 1 ? "s have" : " has"} an inconsistent rating combination. You can save anyway or go back to review.
+      <ul>${items}</ul>`;
+    document.getElementById("warn-modal").classList.add("show");
+    btn.disabled = false;
+    btn.textContent = "Save to Monday.com";
+    return;
+  }
+
+  await doSave(toSave);
+}
+
+function closeWarnModal() {
+  document.getElementById("warn-modal").classList.remove("show");
+  pendingSave = null;
+}
+
+async function proceedSave() {
+  document.getElementById("warn-modal").classList.remove("show");
+  const payload = pendingSave;
+  pendingSave = null;
+  if (payload) await doSave(payload);
+}
+
+async function doSave(toSave) {
+  const btn    = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  const { saved, failed } = await saveRatings(toSave);
+
+  btn.disabled = false;
+  btn.textContent = "Save to Monday.com";
+
+  if (failed === 0) {
+    showToast(`✓ Saved ${saved} employee ratings to Monday.com`, "success");
+    status.textContent = `Last saved: ${new Date().toLocaleTimeString()}`;
+  } else {
+    showToast(`Saved ${saved}, failed ${failed}. Check console for details.`, "error");
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => { t.className = "toast"; }, 4000);
+}
+
+function goBack() {
+  window.location.href = `dashboard.html?token=${TOKEN}`;
+}
+</script>
+</body>
+</html>

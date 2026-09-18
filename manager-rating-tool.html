@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IBM ModernSystems — 2026 Manager Rating Tool</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1f2328; }
+
+  /* HEADER */
+  .header { background: #161616; color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .ibm-logo { font-size: 20px; font-weight: 700; letter-spacing: -1px; margin-right: 14px; }
+  .header-title { font-size: 14px; font-weight: 600; }
+  .header-sub { font-size: 11px; color: #8d8d8d; margin-top: 1px; }
+  .save-btn { background: #0f62fe; color: #fff; border: none; border-radius: 4px; padding: 8px 22px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .save-btn:hover { background: #0050e6; }
+  .save-btn:disabled { background: #525252; cursor: not-allowed; }
+
+  /* TOOLBAR */
+  .toolbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 10px 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .toolbar label { font-size: 12px; font-weight: 600; color: #57606a; }
+  .toolbar select { border: 1px solid #d1d5db; border-radius: 4px; padding: 6px 10px; font-size: 13px; background: #fff; color: #1f2328; min-width: 200px; cursor: pointer; }
+  .toolbar select:focus { outline: 2px solid #0f62fe; outline-offset: 1px; }
+  .progress-wrap { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .progress-label { font-size: 12px; color: #57606a; white-space: nowrap; }
+  .progress-track { width: 140px; height: 8px; background: #f0f2f5; border-radius: 4px; }
+  .progress-fill { height: 100%; border-radius: 4px; background: #198038; transition: width .3s; }
+  .progress-pct { font-size: 12px; font-weight: 700; color: #198038; min-width: 36px; }
+
+  /* LEGEND */
+  .legend { background: #f7f8fa; border-bottom: 1px solid #e5e7eb; padding: 8px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .legend-title { font-size: 11px; font-weight: 600; color: #57606a; text-transform: uppercase; letter-spacing: .06em; }
+  .leg-items { display: flex; gap: 16px; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #57606a; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .dot-top    { background: #198038; }
+  .dot-core   { background: #0f62fe; }
+  .dot-low    { background: #da1e28; }
+  .dot-concern { background: #f59e0b; }
+  .dot-met    { background: #0f62fe; }
+  .dot-notmet { background: #da1e28; }
+  .dot-hold   { background: #8d8d8d; }
+  .dot-blank  { background: #e5e7eb; border: 1px solid #d1d5db; }
+
+  /* MAIN */
+  .main { padding: 20px 28px; }
+
+  /* TEAM HEADER */
+  .team-header { background: #161616; color: #fff; padding: 10px 16px; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .team-name { font-size: 14px; font-weight: 700; }
+  .team-meta { font-size: 11px; color: #8d8d8d; }
+  .team-stats { display: flex; gap: 16px; }
+  .team-stat { font-size: 11px; color: #c6c6c6; }
+  .team-stat span { font-weight: 700; color: #fff; }
+
+  /* TABLE */
+  .rating-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 6px 6px; overflow: hidden; margin-bottom: 28px; }
+  .rating-table thead tr { background: #f7f8fa; }
+  .rating-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #57606a; padding: 9px 12px; border-bottom: 2px solid #e5e7eb; text-align: left; white-space: nowrap; }
+  .rating-table th.center { text-align: center; }
+  .rating-table td { padding: 7px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+  .rating-table tr:last-child td { border-bottom: none; }
+  .rating-table tr:hover td { background: #fafbff; }
+  .rating-table tr.row-complete td { background: #f0fdf4; }
+  .rating-table tr.row-complete:hover td { background: #dcfce7; }
+
+  /* EMPLOYEE INFO */
+  .emp-name { font-size: 13px; font-weight: 600; color: #1f2328; }
+  .emp-meta { font-size: 11px; color: #57606a; margin-top: 1px; }
+  .mgr-tag { display: inline-block; font-size: 10px; background: #ede9fe; color: #5b21b6; padding: 1px 6px; border-radius: 8px; font-weight: 600; margin-left: 4px; }
+
+  /* RATING CHIPS — the key UX: click to select, not dropdowns */
+  .chip-group { display: flex; gap: 4px; flex-wrap: nowrap; }
+  .chip { border: 1.5px solid #e5e7eb; border-radius: 4px; padding: 4px 9px; font-size: 11px; font-weight: 600; cursor: pointer; background: #fff; color: #57606a; transition: all .1s; white-space: nowrap; user-select: none; }
+  .chip:hover { border-color: #9ca3af; color: #1f2328; background: #f9fafb; }
+
+  /* Rating chip active states */
+  .chip.active-top      { background: #198038; border-color: #198038; color: #fff; }
+  .chip.active-core     { background: #0f62fe; border-color: #0f62fe; color: #fff; }
+  .chip.active-low      { background: #da1e28; border-color: #da1e28; color: #fff; }
+  .chip.active-concern  { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+  .chip.active-nelig    { background: #8d8d8d; border-color: #8d8d8d; color: #fff; }
+  .chip.active-met      { background: #0f62fe; border-color: #0f62fe; color: #fff; }
+  .chip.active-notmet   { background: #da1e28; border-color: #da1e28; color: #fff; }
+  .chip.active-hold     { background: #8d8d8d; border-color: #8d8d8d; color: #fff; }
+
+  /* NOTE INPUT */
+  .note-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 4px; padding: 5px 8px; font-size: 12px; font-family: inherit; color: #1f2328; resize: none; min-width: 160px; background: #fff; transition: border .15s; }
+  .note-input:focus { outline: none; border-color: #0f62fe; }
+
+  /* STATUS BADGE */
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-comp { background: #dcfce7; color: #166534; }
+  .badge-pen  { background: #fef3c7; color: #92400e; }
+  .badge-none { background: #f3f4f6; color: #6b7280; }
+
+  /* ROW COMPLETE INDICATOR */
+  .row-indicator { width: 6px; min-width: 6px; padding: 0 !important; }
+  .ind-dot { width: 6px; height: 100%; min-height: 36px; border-radius: 0; display: block; }
+  .ind-complete { background: #198038; }
+  .ind-partial  { background: #f59e0b; }
+  .ind-empty    { background: #e5e7eb; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 28px; right: 28px; background: #161616; color: #fff; padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: 500; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+  .toast.show { display: block; }
+  .toast.success { background: #198038; }
+  .toast.error   { background: #da1e28; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px; color: #57606a; font-size: 13px; background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 6px 6px; margin-bottom: 28px; }
+
+  /* SUMMARY BAR */
+  .summary-bar { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+  .sum-item { text-align: center; }
+  .sum-val { font-size: 22px; font-weight: 700; }
+  .sum-lbl { font-size: 11px; color: #57606a; }
+
+  @media (max-width: 900px) {
+    .main { padding: 14px; }
+    .chip { padding: 4px 6px; font-size: 10px; }
+    .toolbar { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:0;">
+    <div class="ibm-logo">IBM</div>
+    <div style="margin-left:12px;">
+      <div class="header-title">ModernSystems · 2026 Performance Ratings</div>
+      <div class="header-sub">Manager Input Tool — rate your full team on one screen</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div id="save-status" style="font-size:11px;color:#8d8d8d;"></div>
+    <button class="save-btn" id="save-btn" onclick="saveAll()">Save to Monday.com</button>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <label for="leader-select">Leader / Team</label>
+  <select id="leader-select" onchange="renderTeam()">
+    <option value="">— Select your team —</option>
+  </select>
+  <div class="progress-wrap" id="progress-wrap" style="display:none;">
+    <div class="progress-label">Team completion</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-pct" id="progress-pct">0%</div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Rating key</div>
+  <div class="leg-items">
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-right:4px;">Performance:</div>
+    <div class="leg-item"><div class="leg-dot dot-top"></div>Top</div>
+    <div class="leg-item"><div class="leg-dot dot-core"></div>Core</div>
+    <div class="leg-item"><div class="leg-dot dot-low"></div>Low</div>
+    <div class="leg-item"><div class="leg-dot dot-concern"></div>Concern</div>
+    <div class="leg-item"><div class="leg-dot dot-hold"></div>Not Eligible</div>
+    <div style="border-left:1px solid #e5e7eb;height:14px;margin:0 4px;"></div>
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-right:4px;">Outcomes / Skills / Behaviors:</div>
+    <div class="leg-item"><div class="leg-dot dot-met"></div>Met</div>
+    <div class="leg-item"><div class="leg-dot dot-notmet"></div>Not Met</div>
+    <div class="leg-item"><div class="leg-dot dot-hold"></div>On Hold</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main-content">
+  <div style="text-align:center;padding:60px 20px;color:#57606a;">
+    <div style="font-size:32px;margin-bottom:12px;">👆</div>
+    <div style="font-size:15px;font-weight:600;color:#1f2328;margin-bottom:6px;">Select your team above to begin</div>
+    <div style="font-size:13px;">All team members will appear in a single list — rate everyone, then save once.</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const MONDAY_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjcwMjA4MjI4MCwiYWFpIjoxMSwidWlkIjo1MDgyMzgwNSwiaWFkIjoiMjAyNi0wOS0wOVQxMzo1OTowMC4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTM1MzY5ODEsInJnbiI6InVzZTEifQ.Dy3dJ9JRoNRGKyz6rLQYek8DenFGrggdGve0oy8KzGg";
+const BOARD_ID = "18394437029";
+
+// Column IDs
+const COL = {
+  bizOutcomes: "color_mm6w9kzf",
+  skills:      "color_mm6w8eb",
+  behaviors:   "color_mm6wdfc6",
+  rating:      "color_mm6wh443",
+  note:        "long_text_mkwr2w6g"
+};
+
+// Labels per column type
+const OUTCOME_CHIPS = [
+  { label: "Met",      value: "Met",      cls: "active-met"    },
+  { label: "Not Met",  value: "Not Met",  cls: "active-notmet" },
+  { label: "On Hold",  value: "On Hold",  cls: "active-hold"   }
+];
+const RATING_CHIPS = [
+  { label: "Top",         value: "Top",                  cls: "active-top"     },
+  { label: "Core",        value: "Core",                 cls: "active-core"    },
+  { label: "Low",         value: "Low",                  cls: "active-low"     },
+  { label: "Concern",     value: "Performance Concern(s)", cls: "active-concern" },
+  { label: "Not Eligible", value: "Not Eligible",         cls: "active-nelig"   }
+];
+
+// Employee data embedded from Monday.com board
+const TEAM_DATA = [
+  {
+    leader: "Carpenter, James", count: 17,
+    employees: [
+      { id:"10938770115", name:"Baird, Nelson",       band:"Band 8", country:"United States", manager:"KOENIG, JEFFREY",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938768814", name:"Chaffins, Michael",   band:"Band 7", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938766286", name:"Crowell, Chad",        band:"Band 8", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938753420", name:"Dongol, Anand",        band:"Band 7", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938770470", name:"Farley, Stephen",      band:"Band 7", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938768334", name:"Funk, Steven",         band:"Band 7", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938770069", name:"Golovchinsky, Michael",band:"Band 9", country:"Canada",        manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938774001", name:"Grupman, Oleg",        band:"Band 7", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938761959", name:"Hammond, Mark",        band:"Band 8", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938760685", name:"Helsley, Dean",        band:"Band 8", country:"United States", manager:"Carpenter, James",   evalStatus:"Alignment Approval Completed" },
+      { id:"10938762523", name:"KOENIG, JEFFREY",      band:"Band 9", country:"United States", manager:"Carpenter, James",   evalStatus:"Alignment Approval Completed", isPeopleMgr:true },
+      { id:"10938773981", name:"Mattay, Mark",         band:"Band 9", country:"United States", manager:"Carpenter, James",   evalStatus:"Alignment Approval Completed", isPeopleMgr:true },
+      { id:"10938780319", name:"Miller, Tanya",        band:"Band 8", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938753680", name:"Polisco, Mario",       band:"Band 9", country:"Canada",        manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938767412", name:"Rickard, Cecil",       band:"Band 8", country:"United States", manager:"KOENIG, JEFFREY",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938762696", name:"Stelzleni, Peter",     band:"Band 8", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938772097", name:"Turner, Michael",      band:"Band 8", country:"United States", manager:"Mattay, Mark",        evalStatus:"Alignment Approval Completed" }
+    ]
+  },
+  {
+    leader: "Gembala, Maureen", count: 10,
+    employees: [
+      { id:"10938780070", name:"BENNASAR, SEBASTIA",   band:"Band 8", country:"Spain",         manager:"Gembala, Maureen",   evalStatus:"" },
+      { id:"10938774826", name:"Filopoulos, Alex",     band:"Band 8", country:"Cyprus",        manager:"Gembala, Maureen",   evalStatus:"" },
+      { id:"10938775218", name:"Gordon, Jason",        band:"Band 9", country:"United States", manager:"Gembala, Maureen",   evalStatus:"", isPeopleMgr:true },
+      { id:"10938771456", name:"Ivory, Tom",           band:"Band 9", country:"United Kingdom",manager:"Gembala, Maureen",   evalStatus:"", isPeopleMgr:true },
+      { id:"10938773049", name:"Mikellides, Simon",    band:"Band 10",country:"United Kingdom",manager:"Silva, Jose Maria",   evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938764208", name:"Regan, John",          band:"Band 10",country:"United Kingdom",manager:"Silva, Jose Maria",   evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938760393", name:"Silva, Jose Maria",    band:"Band 9", country:"United Kingdom",manager:"Gembala, Maureen",   evalStatus:"", isPeopleMgr:true },
+      { id:"10938766059", name:"TRUE, VICTORIA",       band:"Band 10",country:"United States", manager:"Silva, Jose Maria",   evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938770773", name:"Iancu, Valentin",      band:"Band 10",country:"Romania",       manager:"Silva, Jose Maria",   evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938775091", name:"Wurman, David",        band:"Band 9", country:"United States", manager:"Gembala, Maureen",   evalStatus:"", isPeopleMgr:true }
+    ]
+  },
+  {
+    leader: "Gordon, Jason", count: 13,
+    employees: [
+      { id:"10938779148", name:"Bannon, Kevin",        band:"Band 8", country:"United States", manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938760143", name:"Brailey, Nick",        band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938772629", name:"Collins, Shannon",     band:"Band 6G",country:"United States", manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938764791", name:"Feakins, Stuart",      band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938772264", name:"Gillard, Andrew",      band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938766769", name:"Hartley, Steven",      band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938771278", name:"Jordan, Alistair",     band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938769283", name:"Lakin, Chris",         band:"Band 7", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938766497", name:"Lewis, Owen",          band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938775473", name:"McLean, Alisdair",     band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938770908", name:"Mountney, David",      band:"Band 8", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938772965", name:"Siddiqui, Sufyan",     band:"Band 7", country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"Alignment Approval Completed" },
+      { id:"10938762350", name:"Tait, Sarah",          band:"Band 6G",country:"United Kingdom",manager:"Gordon, Jason",      evalStatus:"" }
+    ]
+  },
+  {
+    leader: "Iancu, Valentin", count: 13,
+    employees: [
+      { id:"10938765539", name:"Andrei, Marius",       band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938766961", name:"Apostol, Victor",      band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938770616", name:"Barna, Iosif",         band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938771073", name:"Burde, Mihai",         band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938763601", name:"Comsa, Mircea",        band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938775308", name:"Dinca, Tudor",         band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938769014", name:"Lacatus, Adrian",      band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938771820", name:"Moise, Paul",          band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938773396", name:"Munteanu, Razvan",     band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938776161", name:"Nedelcu, Valentin",    band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938765834", name:"Pop, Florin",          band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938771194", name:"Radoi, Andrei",        band:"Band 7", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"Alignment Approval Completed" },
+      { id:"10938766720", name:"Rosu, Claudiu",        band:"Band 8", country:"Romania",       manager:"Iancu, Valentin",    evalStatus:"" }
+    ]
+  },
+  {
+    leader: "Regan, John", count: 8,
+    employees: [
+      { id:"10938770285", name:"Devlin, Chris",        band:"Band 8", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938768143", name:"Hague, Patrick",       band:"Band 8", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938762838", name:"Kirk, David",          band:"Band 9", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938762026", name:"Logue, Jonathan",      band:"Band 8", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938776617", name:"Moran, Noel",          band:"Band 8", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938761427", name:"Rankin, Ian",          band:"Band 9", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938776384", name:"Smith, Neil",          band:"Band 8", country:"United Kingdom",manager:"Regan, John",        evalStatus:"Alignment Approval Completed" },
+      { id:"10938770591", name:"Welsh, James",         band:"Band 7", country:"United Kingdom",manager:"Regan, John",        evalStatus:"" }
+    ]
+  },
+  {
+    leader: "Mikellides, Simon", count: 7,
+    employees: [
+      { id:"10938778448", name:"Baz, Nir",             band:"Band 8", country:"Israel",        manager:"Mikellides, Simon",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938763849", name:"Ben-David, Roy",       band:"Band 8", country:"Israel",        manager:"Mikellides, Simon",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938774498", name:"Green, Philip",        band:"Band 8", country:"United Kingdom",manager:"Mikellides, Simon",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938765096", name:"Guttman, Asaf",        band:"Band 8", country:"Israel",        manager:"Mikellides, Simon",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938766634", name:"McPartlin, Adrian",    band:"Band 8", country:"United Kingdom",manager:"Mikellides, Simon",  evalStatus:"" },
+      { id:"10938767673", name:"Odell, James",         band:"Band 9", country:"United Kingdom",manager:"Mikellides, Simon",  evalStatus:"" },
+      { id:"10938777000", name:"Thornhill, Dominic",   band:"Band 8", country:"United Kingdom",manager:"Mikellides, Simon",  evalStatus:"" }
+    ]
+  },
+  {
+    leader: "Silva, Jose Maria", count: 7,
+    employees: [
+      { id:"10938770866", name:"Bagharian, Sonny",     band:"Band 8", country:"United Kingdom",manager:"Silva, Jose Maria",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938766839", name:"Farndale, Martin",     band:"Band 9", country:"United Kingdom",manager:"Silva, Jose Maria",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938764967", name:"Scordos, Michelle",    band:"Band 6G",country:"United States", manager:"Silva, Jose Maria",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938771707", name:"Stephens, Matthew",    band:"Band 9", country:"United Kingdom",manager:"Silva, Jose Maria",  evalStatus:"Alignment Approval Completed" },
+      { id:"10938763396", name:"IANCU, VALENTIN",      band:"Band 10",country:"Romania",       manager:"Silva, Jose Maria",  evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938773049", name:"MIKELLIDES, SIMON",    band:"Band 10",country:"United Kingdom",manager:"Silva, Jose Maria",  evalStatus:"PEN", isPeopleMgr:true },
+      { id:"10938764208", name:"REGAN, JOHN",          band:"Band 10",country:"United Kingdom",manager:"Silva, Jose Maria",  evalStatus:"PEN", isPeopleMgr:true }
+    ]
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let ratings = {}; // { [itemId]: { bizOutcomes, skills, behaviors, rating, note } }
+let currentLeader = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  const sel = document.getElementById("leader-select");
+  TEAM_DATA.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.leader;
+    opt.textContent = `${t.leader} (${t.count} employees)`;
+    sel.appendChild(opt);
+  });
+}
+
+// ── RENDER TEAM ───────────────────────────────────────────────────────────────
+function renderTeam() {
+  const leaderVal = document.getElementById("leader-select").value;
+  const main = document.getElementById("main-content");
+
+  if (!leaderVal) {
+    main.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#57606a;"><div style="font-size:32px;margin-bottom:12px;">👆</div><div style="font-size:15px;font-weight:600;color:#1f2328;margin-bottom:6px;">Select your team above to begin</div><div style="font-size:13px;">All team members appear in a single list — rate everyone, then save once.</div></div>`;
+    document.getElementById("progress-wrap").style.display = "none";
+    return;
+  }
+
+  currentLeader = TEAM_DATA.find(t => t.leader === leaderVal);
+  if (!currentLeader) return;
+
+  // Init ratings state for this team
+  currentLeader.employees.forEach(emp => {
+    if (!ratings[emp.id]) ratings[emp.id] = { bizOutcomes: null, skills: null, behaviors: null, rating: null, note: "" };
+  });
+
+  renderTable();
+  updateProgress();
+  document.getElementById("progress-wrap").style.display = "flex";
+}
+
+function renderTable() {
+  const main = document.getElementById("main-content");
+  const t = currentLeader;
+
+  let html = `
+    <div class="team-header">
+      <div>
+        <div class="team-name">${t.leader}'s Team</div>
+        <div class="team-meta">2026 Performance Ratings · ${t.count} employees</div>
+      </div>
+      <div class="team-stats">
+        <div class="team-stat">Total: <span>${t.count}</span></div>
+        <div class="team-stat" id="stat-complete">Rated: <span>0</span></div>
+        <div class="team-stat" id="stat-remaining">Remaining: <span>${t.count}</span></div>
+      </div>
+    </div>
+    <table class="rating-table">
+      <thead>
+        <tr>
+          <th class="row-indicator"></th>
+          <th>Employee</th>
+          <th class="center">Eval Status</th>
+          <th>Business Outcomes</th>
+          <th>Skills</th>
+          <th>Behaviors</th>
+          <th>Performance Rating</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  t.employees.forEach(emp => {
+    const r = ratings[emp.id];
+    const complete = r.bizOutcomes && r.skills && r.behaviors && r.rating;
+    const partial  = (r.bizOutcomes || r.skills || r.behaviors || r.rating) && !complete;
+    const indClass = complete ? "ind-complete" : partial ? "ind-partial" : "ind-empty";
+    const rowClass = complete ? "row-complete" : "";
+    const statusBadge = emp.evalStatus === "Alignment Approval Completed"
+      ? `<span class="status-badge badge-comp">✓ Aligned</span>`
+      : emp.evalStatus === "PEN"
+      ? `<span class="status-badge badge-pen">PEN</span>`
+      : `<span class="status-badge badge-none">No status</span>`;
+
+    html += `<tr class="${rowClass}" id="row-${emp.id}">
+      <td class="row-indicator"><div class="ind-dot ${indClass}" id="ind-${emp.id}"></div></td>
+      <td>
+        <div class="emp-name">${emp.name}${emp.isPeopleMgr ? '<span class="mgr-tag">Manager</span>' : ''}</div>
+        <div class="emp-meta">${emp.band} · ${emp.country}</div>
+      </td>
+      <td style="text-align:center;">${statusBadge}</td>
+      <td>${renderChips(emp.id, "bizOutcomes", OUTCOME_CHIPS, r.bizOutcomes)}</td>
+      <td>${renderChips(emp.id, "skills",      OUTCOME_CHIPS, r.skills)}</td>
+      <td>${renderChips(emp.id, "behaviors",   OUTCOME_CHIPS, r.behaviors)}</td>
+      <td>${renderChips(emp.id, "rating",      RATING_CHIPS,  r.rating)}</td>
+      <td><textarea class="note-input" rows="1" placeholder="Optional note…"
+            oninput="setNote('${emp.id}', this.value)">${r.note || ""}</textarea></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  main.innerHTML = html;
+}
+
+function renderChips(empId, field, chips, currentVal) {
+  return `<div class="chip-group">` +
+    chips.map(c => {
+      const isActive = currentVal === c.value;
+      return `<div class="chip ${isActive ? c.cls : ''}" onclick="setRating('${empId}','${field}','${c.value}','${c.cls}')">${c.label}</div>`;
+    }).join("") +
+    `</div>`;
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────────────
+function setRating(empId, field, value, activeClass) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes: null, skills: null, behaviors: null, rating: null, note: "" };
+
+  // Toggle off if already selected
+  if (ratings[empId][field] === value) {
+    ratings[empId][field] = null;
+  } else {
+    ratings[empId][field] = value;
+  }
+
+  // Re-render just that row's chips for this field
+  const chips = OUTCOME_CHIPS.includes(OUTCOME_CHIPS.find(c => c.value === value)) ? OUTCOME_CHIPS : RATING_CHIPS;
+  // Determine which chip set
+  const chipSet = (field === "rating") ? RATING_CHIPS : OUTCOME_CHIPS;
+
+  // Update chip display in the row
+  const row = document.getElementById(`row-${empId}`);
+  if (!row) return;
+
+  // Find the chip group for this field by index (col 3=bizOut, 4=skills, 5=behav, 6=rating)
+  const fieldIndex = { bizOutcomes: 3, skills: 4, behaviors: 5, rating: 6 };
+  const cells = row.querySelectorAll("td");
+  const cell = cells[fieldIndex[field]];
+  if (cell) {
+    cell.innerHTML = renderChips(empId, field, chipSet, ratings[empId][field]);
+  }
+
+  // Update row indicator
+  updateRowIndicator(empId);
+  updateProgress();
+}
+
+function setNote(empId, value) {
+  if (!ratings[empId]) ratings[empId] = { bizOutcomes: null, skills: null, behaviors: null, rating: null, note: "" };
+  ratings[empId].note = value;
+}
+
+function updateRowIndicator(empId) {
+  const r = ratings[empId];
+  const complete = r.bizOutcomes && r.skills && r.behaviors && r.rating;
+  const partial  = (r.bizOutcomes || r.skills || r.behaviors || r.rating) && !complete;
+  const ind = document.getElementById(`ind-${empId}`);
+  const row = document.getElementById(`row-${empId}`);
+  if (ind) {
+    ind.className = `ind-dot ${complete ? "ind-complete" : partial ? "ind-partial" : "ind-empty"}`;
+  }
+  if (row) {
+    row.className = complete ? "row-complete" : "";
+  }
+}
+
+function updateProgress() {
+  if (!currentLeader) return;
+  const total = currentLeader.employees.length;
+  const complete = currentLeader.employees.filter(emp => {
+    const r = ratings[emp.id];
+    return r && r.bizOutcomes && r.skills && r.behaviors && r.rating;
+  }).length;
+  const pct = total ? Math.round((complete / total) * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "%";
+
+  // Update stat headers
+  const statComplete = document.getElementById("stat-complete");
+  const statRemaining = document.getElementById("stat-remaining");
+  if (statComplete) statComplete.querySelector("span").textContent = complete;
+  if (statRemaining) statRemaining.querySelector("span").textContent = total - complete;
+}
+
+// ── SAVE TO MONDAY.COM ────────────────────────────────────────────────────────
+async function saveAll() {
+  if (!currentLeader) return;
+
+  const btn = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  status.textContent = "";
+
+  const toSave = currentLeader.employees.filter(emp => {
+    const r = ratings[emp.id];
+    return r && (r.bizOutcomes || r.skills || r.behaviors || r.rating || r.note);
+  });
+
+  if (toSave.length === 0) {
+    showToast("No ratings to save yet — select at least one rating.", "error");
+    btn.disabled = false;
+    btn.textContent = "Save to Monday.com";
+    return;
+  }
+
+  let saved = 0, failed = 0;
+
+  for (const emp of toSave) {
+    const r = ratings[emp.id];
+    const colVals = {};
+    if (r.bizOutcomes) colVals[COL.bizOutcomes] = { label: r.bizOutcomes };
+    if (r.skills)      colVals[COL.skills]      = { label: r.skills };
+    if (r.behaviors)   colVals[COL.behaviors]   = { label: r.behaviors };
+    if (r.rating)      colVals[COL.rating]      = { label: r.rating };
+    if (r.note)        colVals[COL.note]        = { text: r.note };
+
+    const mutation = `mutation {
+      change_multiple_column_values(
+        board_id: ${BOARD_ID},
+        item_id: ${emp.id},
+        column_values: ${JSON.stringify(JSON.stringify(colVals))}
+      ) { id }
+    }`;
+
+    try {
+      const res = await fetch("https://api.monday.com/v2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": MONDAY_TOKEN
+        },
+        body: JSON.stringify({ query: mutation })
+      });
+      const data = await res.json();
+      if (data.errors) { failed++; console.error(emp.name, data.errors); }
+      else saved++;
+    } catch(e) {
+      failed++;
+      console.error(emp.name, e);
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Save to Monday.com";
+
+  if (failed === 0) {
+    showToast(`✓ Saved ${saved} employee ratings to Monday.com`, "success");
+    status.textContent = `Last saved: ${new Date().toLocaleTimeString()}`;
+  } else {
+    showToast(`Saved ${saved}, failed ${failed}. Check console for details.`, "error");
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => { t.className = "toast"; }, 4000);
+}
+
+init();
+</script>
+</body>
+</html>

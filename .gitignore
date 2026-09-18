@@ -1,0 +1,16 @@
+﻿# ── Secrets — NEVER commit these ──────────────────────────────────────────────
+performance-review-app/config.js
+
+# ── Sensitive HR data ──────────────────────────────────────────────────────────
+performance-review-app/MANAGER_LINKS.md
+
+# ── OS / editor noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ── Node (if ever used) ───────────────────────────────────────────────────────
+node_modules/
+.env
+.env.*

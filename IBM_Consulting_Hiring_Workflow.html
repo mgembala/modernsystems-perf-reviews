@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBM Consulting – Hiring Workflow</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; font-size: 14px; background: #f4f4f4; color: #161616; line-height: 1.5; }
+
+  /* ── Header ── */
+  .site-header { background: #001f57; color: #fff; padding: 28px 40px 20px; }
+  .site-header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.3px; }
+  .site-header p  { font-size: 13px; color: #a8c0ff; margin-top: 6px; }
+
+  /* ── Nav tabs ── */
+  .tab-bar { display: flex; gap: 0; background: #0f3460; padding: 0 40px; overflow-x: auto; }
+  .tab-btn { background: none; border: none; color: #c0cfe8; font-size: 13px; font-weight: 500;
+             padding: 12px 22px; cursor: pointer; border-bottom: 3px solid transparent;
+             white-space: nowrap; transition: color .15s, border-color .15s; }
+  .tab-btn:hover  { color: #fff; }
+  .tab-btn.active { color: #fff; border-bottom-color: #0f62fe; }
+
+  /* ── Content panels ── */
+  .tab-panel { display: none; padding: 28px 40px 48px; max-width: 1300px; margin: 0 auto; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section title ── */
+  .section-title { font-size: 18px; font-weight: 600; color: #001f57; margin-bottom: 6px; }
+  .section-sub   { font-size: 12px; color: #555; margin-bottom: 20px; }
+
+  /* ── Overview cards ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 32px; }
+  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 20px; border-top: 4px solid #0f62fe; }
+  .card.green  { border-top-color: #24a148; }
+  .card.orange { border-top-color: #f1620a; }
+  .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #161616; }
+  .card p  { font-size: 12px; color: #555; line-height: 1.6; }
+  .card .tag { display: inline-block; background: #e8f0fe; color: #0043ce; font-size: 11px;
+               padding: 2px 8px; border-radius: 12px; margin-top: 10px; font-weight: 500; }
+  .card.green  .tag { background: #defbe6; color: #0e6027; }
+  .card.orange .tag { background: #fff2e8; color: #a56000; }
+
+  /* ── Step tables ── */
+  .step-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 4px;
+                overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .step-table thead tr { background: #007cc3; color: #fff; }
+  .step-table thead th { padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600;
+                          white-space: nowrap; }
+  .step-table tbody tr:nth-child(even) { background: #f0f7ff; }
+  .step-table tbody tr:hover { background: #dbeeff; }
+  .step-table tbody td { padding: 10px 14px; font-size: 12px; vertical-align: top; border-bottom: 1px solid #e8e8e8; }
+  .step-table tbody td:first-child { font-weight: 700; color: #0043ce; width: 36px; text-align: center; }
+
+  /* Section rows inside tables */
+  .step-table .phase-row td { background: #1f57a4; color: #fff; font-weight: 600; font-size: 12px;
+                               padding: 7px 14px; letter-spacing: .4px; }
+
+  /* ── Pill badges ── */
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+  .pill-blue   { background: #e8f0fe; color: #0043ce; }
+  .pill-green  { background: #defbe6; color: #0e6027; }
+  .pill-orange { background: #fff2e8; color: #a56000; }
+
+  /* ── Tools table ── */
+  .tools-table { width: 100%; border-collapse: collapse; background: #fff;
+                 border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .tools-table thead tr { background: #001f57; color: #fff; }
+  .tools-table thead th { padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600; }
+  .tools-table tbody tr:nth-child(even) { background: #f4f4f4; }
+  .tools-table tbody td { padding: 10px 14px; font-size: 12px; vertical-align: top; border-bottom: 1px solid #e8e8e8; }
+  .tools-table a { color: #0f62fe; text-decoration: none; word-break: break-all; }
+  .tools-table a:hover { text-decoration: underline; }
+
+  /* ── Source note ── */
+  .source-note { font-size: 11px; color: #888; margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; }
+  .source-note a { color: #0f62fe; }
+
+  /* ── Approval flow ── */
+  .approval-flow { display: flex; flex-wrap: wrap; gap: 0; align-items: center; margin: 18px 0 28px; }
+  .flow-step { background: #fff; border: 1px solid #c0cfe8; border-radius: 4px; padding: 10px 16px;
+               font-size: 12px; text-align: center; min-width: 130px; }
+  .flow-step strong { display: block; font-size: 11px; color: #0043ce; margin-bottom: 2px; }
+  .flow-arrow { font-size: 18px; color: #0f62fe; padding: 0 6px; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>IBM Consulting – Hiring Workflow</h1>
+  <p>End-to-end process for Internal Transfers, External New Hires, and Subcontractor Engagements &nbsp;|&nbsp; Source: IBM W3 Publisher (IBM Consulting Workforce Management, 2025)</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="showTab('internal',this)">Internal Transfer</button>
+  <button class="tab-btn" onclick="showTab('external',this)">External New Hire</button>
+  <button class="tab-btn" onclick="showTab('subk',this)">Subcontractor / External Consultant</button>
+  <button class="tab-btn" onclick="showTab('tools',this)">Tools &amp; References</button>
+</div>
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div id="tab-overview" class="tab-panel active">
+  <div class="section-title">Hiring Track Overview</div>
+  <div class="section-sub">IBM Consulting uses three distinct hiring tracks depending on the resource type. All delivery hires (Bands 4–9) must follow the Fulfilment Hierarchy — exhausting internal options before external hiring is considered.</div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Track 1 – Internal Transfer</h3>
+      <p>An IBM employee moves from another Line of Business (LoB), Center of Competency (CoC), or Client Innovation Center (CIC) into IBM Consulting. Delivery Bands 4–9. Follows same approval chain as external hire.</p>
+      <span class="tag">TRAM &bull; MySA / ProM &bull; Avature</span>
+    </div>
+    <div class="card green">
+      <h3>Track 2 – External New Hire</h3>
+      <p>Net-new hire from outside IBM into IBM Consulting (Bands 4–9). Requires Open Seat, TRAM approval, external recruitment campaign via Avature, and GEO/FNC/Global Hiring Board approval before offer release.</p>
+      <span class="tag">TRAM &bull; Avature &bull; GEO/FNC Board</span>
+    </div>
+    <div class="card orange">
+      <h3>Track 3 – Subcontractor / External Consultant</h3>
+      <p>Engaging a Business Partner or non-IBM supplier for project delivery. Used for co-sales, WBS staffing, or when internal skills unavailable. Routed through SPI/Buy@IBM and Ariba for PO creation.</p>
+      <span class="tag">SPI &bull; Buy@IBM &bull; Ariba &bull; TRAM</span>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:8px;">Requisition Approval Flow (All Tracks)</div>
+  <div class="section-sub">All hires into IBM Consulting — including internal transfers and subcontractors — must progress through this approval chain.</div>
+  <div class="approval-flow">
+    <div class="flow-step"><strong>Step 0</strong>Open Seat / Resource Request Raised</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 1</strong>WFM Internal Search</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 2</strong>TRAM Hiring Request Submitted</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 3</strong>WFM Capacity Review</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 4</strong>Market Approval</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 5</strong>GEO / FNC Hiring Board</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 6</strong>Global Board (if needed)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><strong>Step 7</strong>Offer Released</div>
+  </div>
+
+  <table class="step-table">
+    <thead><tr>
+      <th>Track</th><th>Primary Approvers</th><th>Key Tools</th><th>Approval Validity</th><th>W3 Source</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="text-align:left;font-weight:600;">Internal Transfer</td><td>Market → GEO/FNC → Global Hiring Board</td><td>MySA, TRAM, Avature</td><td>90 days (or end of quarter)</td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">WFM Hiring Process</a></td></tr>
+      <tr><td style="text-align:left;font-weight:600;">External New Hire</td><td>Market → GEO/FNC → Global Hiring Board</td><td>TRAM, Avature, MySA</td><td>90 days (or end of quarter)</td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">WFM Hiring Process</a></td></tr>
+      <tr><td style="text-align:left;font-weight:600;">Subcontractor</td><td>Finance SubK Delegation Matrix, Ariba</td><td>SPI/Buy@IBM, Ariba, TRAM</td><td>Per PO terms</td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-contractor-management" target="_blank">Contractor Management</a></td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: <a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">IBM Consulting Workforce Management – Hiring Process (W3 Publisher)</a></p>
+</div>
+
+<!-- ═══════════════════════════ INTERNAL HIRE ═══════════════════════════ -->
+<div id="tab-internal" class="tab-panel">
+  <div class="section-title">Track 1 – Internal Transfer</div>
+  <div class="section-sub">IBM employee moving from another LoB / CoC / CIC into IBM Consulting &nbsp;|&nbsp; Delivery Bands 4–9</div>
+  <table class="step-table">
+    <thead><tr><th>#</th><th>Phase</th><th>Step / Action</th><th>Owner</th><th>Tool / System</th><th>Key Notes</th></tr></thead>
+    <tbody>
+      <tr class="phase-row"><td colspan="6">PRE-HIRING</td></tr>
+      <tr><td>1</td><td><span class="pill pill-blue">Identify Need</span></td><td>Identify resource gap on account / project. Document required skills, band, and JRS.</td><td>Account / Business Manager</td><td>MySA / ProM / Certinia</td><td>Raise an Open Seat first. Internal searches must exhaust the Fulfilment Hierarchy before progressing.</td></tr>
+      <tr><td>2</td><td><span class="pill pill-blue">Internal Search</span></td><td>WFM searches available internal IBM resources matching skill and band requirements.</td><td>Workforce Capacity Manager (WCM)</td><td>MySA / Talent Search</td><td>Sourcing Hierarchy must be followed. Internal candidates preferred before external hire is considered.</td></tr>
+      <tr class="phase-row"><td colspan="6">HIRE REQUEST</td></tr>
+      <tr><td>3</td><td><span class="pill pill-blue">Submit Request</span></td><td>If no internal match, Hiring Manager completes a TRAM Hiring Manager Request. Import data from PROM Seat ID.</td><td>Hiring Manager</td><td><a href="https://tram.projectservices.dal.app.cirrus.ibm.com/CreateHiringRequest" target="_blank">TRAM</a></td><td>Open Seat must be active and not older than 6 months at time of offer approval.</td></tr>
+      <tr><td>4</td><td><span class="pill pill-blue">WFM Review</span></td><td>WCM checks completeness, validates capacity business case, and routes for posting approval.</td><td>Workforce Capacity Manager</td><td>TRAM</td><td>Market Capacity Manager confirms financial justification and routes to approvers.</td></tr>
+      <tr class="phase-row"><td colspan="6">APPROVALS</td></tr>
+      <tr><td>5</td><td><span class="pill pill-orange">Market Approval</span></td><td>Market reviews and approves posting the requisition.</td><td>Market Hiring Board</td><td>TRAM</td><td>Business case must include utilisation/bench data, supply vs. demand, band mix, revenue and profit impact.</td></tr>
+      <tr><td>6</td><td><span class="pill pill-orange">GEO / FNC Approval</span></td><td>GEO/FNC Hiring Board reviews cases outside Market delegation. Meets weekly (Wednesdays).</td><td>GEO / FNC Hiring Board</td><td>TRAM</td><td>All hires including transfer-ins must go through GEO/FNC and Global Hiring Boards.</td></tr>
+      <tr><td>7</td><td><span class="pill pill-orange">Global Approval</span></td><td>Cases outside GEO/FNC delegation go to Global Board for review and decision.</td><td>Global Hiring Board</td><td>TRAM</td><td>Approval valid for 90 days. Extension requires revisiting the Hiring Board.</td></tr>
+      <tr class="phase-row"><td colspan="6">TRANSFER EXECUTION</td></tr>
+      <tr><td>8</td><td><span class="pill pill-green">Open Requisition</span></td><td>Hiring Manager raises requisition on Avature Recruitment Platform once posting approval is granted.</td><td>Hiring Manager</td><td><a href="https://ibmglobal.avature.net/hiringmanager" target="_blank">Avature</a></td><td>Dashboard shows all open job requisitions and candidate pipeline.</td></tr>
+      <tr><td>9</td><td><span class="pill pill-green">Candidate Selected</span></td><td>Talent Acquisition Partner sets status to "Recommend for Offer" in Avature.</td><td>Talent Acquisition Partner (TAP)</td><td>Avature</td><td>TAP enters candidate in TRAM to initiate offer approval chain.</td></tr>
+      <tr><td>10</td><td><span class="pill pill-orange">Offer Approval</span></td><td>Market → GEO/FNC Hiring Board approves offer. Global approves if outside delegation.</td><td>GEO / FNC / Global Hiring Board</td><td>TRAM (Offer Approval Flow)</td><td>Offer approval valid to end of quarter or 90 days, whichever is longer.</td></tr>
+      <tr><td>11</td><td><span class="pill pill-green">Offer Release</span></td><td>Talent Acquisition releases formal offer letter to candidate.</td><td>Talent Acquisition</td><td>Avature / HR System</td><td></td></tr>
+      <tr class="phase-row"><td colspan="6">ONBOARDING</td></tr>
+      <tr><td>12</td><td><span class="pill pill-blue">Onboarding</span></td><td>Hiring Manager completes new joiner onboarding checklist — systems access, equipment, day-1 orientation.</td><td>Hiring Manager</td><td><a href="https://w3.ibm.com/w3publisher/start-at-ibm/new-hiring-managers" target="_blank">Start@IBM Publisher</a></td><td>Includes IBM Consulting onboarding programme and role-specific enablement.</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: <a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">IBM Consulting Workforce Management – Hiring Process (W3 Publisher)</a></p>
+</div>
+
+<!-- ═══════════════════════════ EXTERNAL NEW HIRE ═══════════════════════════ -->
+<div id="tab-external" class="tab-panel">
+  <div class="section-title">Track 2 – External New Hire</div>
+  <div class="section-sub">Net-new hire from outside IBM into IBM Consulting &nbsp;|&nbsp; Delivery Bands 4–9</div>
+  <table class="step-table">
+    <thead><tr><th>#</th><th>Phase</th><th>Step / Action</th><th>Owner</th><th>Tool / System</th><th>Key Notes</th></tr></thead>
+    <tbody>
+      <tr class="phase-row"><td colspan="6">PRE-HIRING</td></tr>
+      <tr><td>1</td><td><span class="pill pill-blue">Identify Need</span></td><td>Account / Business Manager identifies delivery gap (Band 4–9). Open Seat raised in MySA/ProM.</td><td>Account / Business Manager</td><td>MySA / ProM / Certinia</td><td>Raise Open Seat first. Fulfilment Hierarchy must be exhausted — internal sources first.</td></tr>
+      <tr><td>2</td><td><span class="pill pill-blue">Internal Search</span></td><td>WFM performs BAU search for available internal resources. If no suitable match: proceed to external.</td><td>Workforce Capacity Manager</td><td>MySA / Talent Search</td><td>Step 1 of Requisition Approval Process Flow. Organic sources must be exhausted first.</td></tr>
+      <tr class="phase-row"><td colspan="6">HIRE REQUEST</td></tr>
+      <tr><td>3</td><td><span class="pill pill-blue">Submit TRAM Request</span></td><td>Hiring Manager submits TRAM Hiring Manager Request, importing data from PROM Open Seat.</td><td>Hiring Manager</td><td><a href="https://tram.projectservices.dal.app.cirrus.ibm.com/CreateHiringRequest" target="_blank">TRAM</a></td><td>Include full business case. Cost Rate from Consulting Finance; Bill Rate from Project Manager.</td></tr>
+      <tr><td>4</td><td><span class="pill pill-blue">WFM Capacity Check</span></td><td>WCM validates request completeness and capacity business case. Routes to posting approvers.</td><td>Workforce Capacity Manager</td><td>TRAM</td><td>Market Capacity Manager performs check and routes to approvers for posting.</td></tr>
+      <tr class="phase-row"><td colspan="6">APPROVALS (POSTING)</td></tr>
+      <tr><td>5</td><td><span class="pill pill-orange">Market Approval</span></td><td>Market approves posting the requisition.</td><td>Market Hiring Board</td><td>TRAM</td><td>Business case must include: utilisation/bench, supply vs. demand, band mix, revenue and profit impact.</td></tr>
+      <tr><td>6</td><td><span class="pill pill-orange">GEO / FNC Approval</span></td><td>GEO/FNC Board reviews if outside Market delegation.</td><td>GEO / FNC Hiring Board</td><td>TRAM</td><td>All hires must go through GEO/FNC and Global Hiring Boards.</td></tr>
+      <tr><td>7</td><td><span class="pill pill-orange">Global Approval</span></td><td>Global Board reviews cases outside GEO/FNC delegation.</td><td>Global Hiring Board</td><td>TRAM</td><td>Meets weekly. Approval valid 90 days.</td></tr>
+      <tr class="phase-row"><td colspan="6">RECRUITMENT</td></tr>
+      <tr><td>8</td><td><span class="pill pill-green">Open Requisition</span></td><td>Hiring Manager raises requisition on Avature to start external recruitment campaign.</td><td>Hiring Manager</td><td><a href="https://ibmglobal.avature.net/hiringmanager" target="_blank">Avature</a></td><td>Agency channel is "Platinum Channel" — only if other channels unsuccessful. ONLY IBM TA can engage agencies (BCG Guidelines 4.4).</td></tr>
+      <tr><td>9</td><td><span class="pill pill-green">TA Campaign</span></td><td>Talent Acquisition attracts, screens, assesses, arranges interviews, negotiates, and prepares offers.</td><td>Talent Acquisition Partner</td><td>Avature / TA Platform</td><td>Max 3 interviews recommended. See: <a href="https://w3.ibm.com/w3publisher/ibm-global-talent-acquisition" target="_blank">Global TA Process</a></td></tr>
+      <tr><td>10</td><td><span class="pill pill-green">Interviews</span></td><td>Hiring Manager conducts structured interviews with shortlisted candidates.</td><td>Hiring Manager</td><td>Avature (scheduling)</td><td>Interviewers should block weekly time. Document joint interview process. Avoid single decision-maker.</td></tr>
+      <tr class="phase-row"><td colspan="6">APPROVALS (OFFER)</td></tr>
+      <tr><td>11</td><td><span class="pill pill-orange">Recommend for Offer</span></td><td>TA Partner sets candidate status to "Recommend for Offer" in Avature.</td><td>Talent Acquisition Partner</td><td>Avature</td><td>Open Seat / approval to raise requisition must not be older than 6 months.</td></tr>
+      <tr><td>12</td><td><span class="pill pill-orange">Market Offer Approval</span></td><td>Market reviews and approves offer release.</td><td>Market Hiring Board</td><td>TRAM (Offer Approval Flow)</td><td></td></tr>
+      <tr><td>13</td><td><span class="pill pill-orange">GEO / FNC / Global Approval</span></td><td>Wednesday GEO/FNC Hiring Board approves. Cases outside delegation go to Global.</td><td>GEO / FNC / Global Hiring Board</td><td>TRAM</td><td>Approval valid to end of quarter or 90 days. Extensions require Hiring Board revisit.</td></tr>
+      <tr><td>14</td><td><span class="pill pill-green">Offer Release</span></td><td>TA releases formal offer letter to candidate.</td><td>Talent Acquisition</td><td>Avature / HR</td><td></td></tr>
+      <tr class="phase-row"><td colspan="6">ONBOARDING</td></tr>
+      <tr><td>15</td><td><span class="pill pill-blue">Pre-Boarding</span></td><td>Hiring Manager completes pre-boarding checklist. Systems access requested. Equipment ordered.</td><td>Hiring Manager</td><td><a href="https://w3.ibm.com/w3publisher/start-at-ibm/new-hiring-managers" target="_blank">Start@IBM Publisher</a></td><td>EMEA DACH, Japan, and FNC India have separate local processes — see W3 exception links on WFM page.</td></tr>
+      <tr><td>16</td><td><span class="pill pill-blue">Day 1 Onboarding</span></td><td>New joiner attends IBM Consulting onboarding programme.</td><td>HR / Hiring Manager</td><td>Start@IBM Publisher</td><td></td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: <a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">IBM Consulting Workforce Management – Hiring Process (W3 Publisher)</a> &nbsp;|&nbsp; <a href="https://w3.ibm.com/w3publisher/hiring-manager-emea-enablement/external-hiring-process/external-hiring-process" target="_blank">EMEA External Hiring Process</a></p>
+</div>
+
+<!-- ═══════════════════════════ SUBK ═══════════════════════════ -->
+<div id="tab-subk" class="tab-panel">
+  <div class="section-title">Track 3 – Subcontractor / External Consultant</div>
+  <div class="section-sub">Engaging a Business Partner or non-IBM supplier for IBM Consulting project delivery &nbsp;|&nbsp; Includes co-sale partners, T&amp;M subcontractors, and contracted resources</div>
+  <table class="step-table">
+    <thead><tr><th>#</th><th>Phase</th><th>Step / Action</th><th>Owner</th><th>Tool / System</th><th>Key Notes</th></tr></thead>
+    <tbody>
+      <tr class="phase-row"><td colspan="6">IDENTIFY NEED</td></tr>
+      <tr><td>1</td><td><span class="pill pill-blue">Identify Need</span></td><td>RDM / Delivery Manager identifies skills, clearances, or languages not available internally. Validate need against project WBS or co-sale requirement.</td><td>Resource Delivery Manager (RDM)</td><td>ProM / WBS Staffing Plan</td><td>SubK only if internal resources unavailable. Scenarios: Co-sale, WBS Staffing, Non-availability of internal skills.</td></tr>
+      <tr class="phase-row"><td colspan="6">SOURCE SUBCONTRACTOR</td></tr>
+      <tr><td>2</td><td><span class="pill pill-green">Tier 1 Search</span></td><td>WFM team enters request into SPI (Buy@IBM). Request routed to Tier 1 IBM-designated Business Partners. 24-hour response window.</td><td>WFM / RDM</td><td>SPI – Buy@IBM</td><td>Co-sale exception: WFM can route directly to identified partner using "referral" option — skips Tier 1/2 wait.</td></tr>
+      <tr><td>3</td><td><span class="pill pill-green">Tier 2 Escalation</span></td><td>If no Tier 1 response within 24 business hours, request is automatically routed to Tier 2 Business Partners.</td><td>WFM Team</td><td>SPI – Buy@IBM</td><td>IBM-designated Business Partners only at Tier 1 &amp; 2. Non-designated partners require additional Procurement approval and supplier onboarding.</td></tr>
+      <tr><td>4</td><td><span class="pill pill-green">Profile Review</span></td><td>RDM shares candidate profiles with Project Manager / Delivery Manager for evaluation and shortlisting.</td><td>RDM / Delivery Manager</td><td>SPI – Buy@IBM</td><td>Delivery Manager confirms selected resource in the SPI tool.</td></tr>
+      <tr class="phase-row"><td colspan="6">APPROVAL &amp; CONTRACTING</td></tr>
+      <tr><td>5</td><td><span class="pill pill-orange">Rate Negotiation</span></td><td>Delivery Manager, Procurement, and Business Partner Ecosystem team finalize SubK cost rates and contractual terms.</td><td>Delivery Manager + Procurement</td><td>SPI / Ariba</td><td>SubK cost rate and financial details must be confirmed before initiating cost approval in Ariba.</td></tr>
+      <tr><td>6</td><td><span class="pill pill-orange">SubK Cost Approval</span></td><td>RDM initiates SubK cost approval process in Ariba/Buy@IBM using the SubK Cost Approval form.</td><td>RDM</td><td><a href="https://s1.ariba.com/Buyer/Main/aw?awh=r&awssk=Vyl1Uqt97avnmudH&realm=IBM-GP0" target="_blank">Ariba – Buy@IBM</a></td><td>Approved via Finance SubK Delivery Leader Delegation Matrix. IBM Consulting Executives receive summary Mon &amp; Wed.</td></tr>
+      <tr><td>7</td><td><span class="pill pill-orange">Supplier Onboarding</span></td><td>Procurement evaluates new supplier: financial solvency, legal compliance, IBM tech standards, social and environmental requirements.</td><td>Procurement</td><td><a href="https://w3.ibm.com/w3publisher/globalsupplieronboarding/education-materials" target="_blank">Supplier Onboarding Portal</a></td><td>Only required for suppliers NOT already IBM-designated. Covers legal, regulatory, and IBM policy criteria.</td></tr>
+      <tr><td>8</td><td><span class="pill pill-orange">Purchase Requisition</span></td><td>Finance / Procurement creates PR detailing services, costs, payment terms, and laptop shipment (if applicable).</td><td>Finance / Procurement</td><td>Ariba – PR Module</td><td>Requisition reviewed and approved by Finance and Delivery teams. Includes order reference number.</td></tr>
+      <tr><td>9</td><td><span class="pill pill-green">Purchase Order</span></td><td>Approved PO sent to subcontractor via Ariba. Legally binding contract between IBM and the subcontractor.</td><td>Procurement</td><td>Ariba – PO Module</td><td>PO includes: description of services, quantity, price, payment terms, laptop details (if applicable).</td></tr>
+      <tr class="phase-row"><td colspan="6">DATA PRIVACY &amp; COMPLIANCE</td></tr>
+      <tr><td>10</td><td><span class="pill pill-blue">Sub-Processor Flow-Down</span></td><td>Complete Privacy/Security flow-down for any SubK that will process client Personal Information (PI).</td><td>Delivery Manager / Legal</td><td><a href="https://w3.ibm.com/w3publisher/privacy-and-security-online-terms/processing-details-exhibit" target="_blank">Processing Details Exhibit</a></td><td>External SubK processing client PI requires Processing Details Exhibit via Procurement. See <a href="https://w3.ibm.com/w3publisher/dprc/security-tools-and-resources/sub-processors" target="_blank">DPRC Sub-Processor site</a>.</td></tr>
+      <tr><td>11</td><td><span class="pill pill-blue">Cross-Border Review</span></td><td>If SubK is in a different country/legal entity, obtain IDA guidance and approval on cross-border conditions.</td><td>Delivery Manager / IDA</td><td><a href="https://w3.ibm.com/w3publisher/international-deal-advisory" target="_blank">IDA – International Deal Advisory</a></td><td>Assess risks for staffing, delivery locations, and travel. Re-assess if Dynamic Delivery changes occur during engagement.</td></tr>
+      <tr class="phase-row"><td colspan="6">ONBOARD &amp; MANAGE</td></tr>
+      <tr><td>12</td><td><span class="pill pill-green">Resource Onboarding</span></td><td>Subcontractor onboarded per IBM site/project access requirements. Laptop/equipment arranged per PO terms.</td><td>Hiring Manager / RDM</td><td>Start@IBM / Site Access</td><td>Hiring Manager must be in the country where the SubK employee resides (ToE requirement). GAHP informed of all onboards.</td></tr>
+      <tr><td>13</td><td><span class="pill pill-green">Engagement Management</span></td><td>Track SubK performance, time reporting, and deliverables against PO and contract terms throughout engagement.</td><td>Project Manager / Delivery Manager</td><td>Ariba / Project Tools</td><td>GAHP informed of all hiring activity including SubK attrition not backfilled.</td></tr>
+      <tr><td>14</td><td><span class="pill pill-blue">Convert to FTE (optional)</span></td><td>To convert a SubK to a permanent IBM employee, Hiring Manager initiates a TRAM Hiring Request and follows the External Hire process (Track 2).</td><td>Hiring Manager</td><td><a href="https://tram.projectservices.dal.app.cirrus.ibm.com/CreateHiringRequest" target="_blank">TRAM</a></td><td>WCM confirms financial business case. TA releases offer once approved. See: <a href="https://w3.ibm.com/w3publisher/ibm-consulting-contractor-management" target="_blank">Contractor Management W3</a></td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">Source: <a href="https://pages.github.ibm.com/expertlabs-playbook-staging/playbook/el-rdm/staffing-requests-external/" target="_blank">IBM Expert Labs Playbook – Staffing with External Resources</a> &nbsp;|&nbsp; <a href="https://w3.ibm.com/w3publisher/ibm-consulting-crm-process/ibm-consulting-crm-process/5-initiate-project-delivery/5-3-obtain-staff" target="_blank">IBM Consulting CRM Process 5.3 – Obtain Staff</a> &nbsp;|&nbsp; <a href="https://w3.ibm.com/w3publisher/gbs-na-wfm/consultants/project-manager-hiring-subk-process" target="_blank">Americas WFM – Contractor/SubK Process</a></p>
+</div>
+
+<!-- ═══════════════════════════ TOOLS ═══════════════════════════ -->
+<div id="tab-tools" class="tab-panel">
+  <div class="section-title">Key Tools &amp; W3 Reference Links</div>
+  <div class="section-sub">Systems used across all three hiring tracks, sourced from IBM W3 Publisher</div>
+  <table class="tools-table">
+    <thead><tr><th>Tool / System</th><th>Purpose</th><th>Used In</th><th>W3 / Access URL</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MySA / ProM / Certinia</strong></td><td>Raise and manage Open Seats and Talent Requests on accounts and projects</td><td><span class="pill pill-blue">All Tracks</span></td><td><a href="https://w3.ibm.com/services/tools/mysa/app/#/RequestedSeats" target="_blank">MySA Open Seats</a></td><td>Starting point for Fulfilment Hierarchy. Required before TRAM request.</td></tr>
+      <tr><td><strong>TRAM</strong></td><td>Tracking Resource Approvals Manager – manages all hiring approvals (posting and offer)</td><td><span class="pill pill-blue">All Tracks</span></td><td><a href="https://tram.projectservices.dal.app.cirrus.ibm.com/CreateHiringRequest" target="_blank">Create Hiring Request</a> &nbsp;|&nbsp; <a href="https://w3.ibm.com/w3publisher/gbs-tram" target="_blank">TRAM Publisher</a></td><td>Use Import function from PROM Seat ID to pre-populate request data.</td></tr>
+      <tr><td><strong>Avature</strong></td><td>Recruitment Platform – job requisitions, candidate management, interview scheduling, offer tracking</td><td><span class="pill pill-green">External Hire</span></td><td><a href="https://ibmglobal.avature.net/hiringmanager" target="_blank">Avature Hiring Manager</a></td><td>TA Partner uses to set "Recommend for Offer" status. Dashboard for all open requisitions.</td></tr>
+      <tr><td><strong>SPI – Buy@IBM (Services Procurement)</strong></td><td>Subcontractor sourcing – routes requests to Tier 1/2 IBM-designated Business Partners</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://ec.yourlearning.ibm.com/w3/series/10389304?layout=grid" target="_blank">SPI Training Guide</a></td><td>WFM team enters data and manages routing to partners. Co-sale referral option skips tier wait.</td></tr>
+      <tr><td><strong>Ariba / Buy@IBM</strong></td><td>Purchase Requisition and Purchase Order creation and approval for subcontractors</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://s1.ariba.com/Buyer/Main/aw?awh=r&awssk=Vyl1Uqt97avnmudH&realm=IBM-GP0" target="_blank">Ariba Buyer Portal</a></td><td>SubK cost approval via Finance SubK Delivery Leader Delegation Matrix. Exec summary Mon &amp; Wed.</td></tr>
+      <tr><td><strong>Start@IBM Publisher</strong></td><td>Onboarding resources, checklists, and guidance for Hiring Managers</td><td><span class="pill pill-blue">All Tracks</span></td><td><a href="https://w3.ibm.com/w3publisher/start-at-ibm/new-hiring-managers" target="_blank">Start@IBM</a></td><td>Covers systems access, equipment, day-1 orientation, and IBM Consulting onboarding.</td></tr>
+      <tr><td><strong>IDA – International Deal Advisory</strong></td><td>Cross-border condition assessment and approval for international SubK engagements</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://w3.ibm.com/w3publisher/international-deal-advisory" target="_blank">IDA W3 Publisher</a></td><td>Required when SubK or delivery is in a different country or legal entity.</td></tr>
+      <tr><td><strong>Supplier Onboarding Portal</strong></td><td>Onboard new non-designated suppliers – compliance, financial solvency, IBM policy checks</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://w3.ibm.com/w3publisher/globalsupplieronboarding/education-materials" target="_blank">Global Supplier Onboarding</a></td><td>Only required if supplier is not already an IBM-designated Business Partner.</td></tr>
+      <tr><td><strong>IBM Consulting Contractor Management</strong></td><td>SubK process templates, guidance, and conversion-to-FTE process</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-contractor-management" target="_blank">Contractor Management W3</a></td><td>Reach out to your WSP to begin the SubK process.</td></tr>
+      <tr><td><strong>IBM Consulting WFM Publisher</strong></td><td>Primary W3 reference for all delivery hiring process documentation</td><td><span class="pill pill-blue">All Tracks</span></td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-workforce-management/consultants-managers/managers/hiring-process" target="_blank">WFM Hiring Process</a></td><td>Includes FAQs, process flows, approval tables, and exception processes by geography.</td></tr>
+      <tr><td><strong>DPRC Sub-Processor Site</strong></td><td>Data privacy and security flow-down process for SubKs processing client Personal Information</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://w3.ibm.com/w3publisher/dprc/security-tools-and-resources/sub-processors" target="_blank">DPRC Sub-Processors</a></td><td>Processing Details Exhibit required for any SubK handling client PI.</td></tr>
+      <tr><td><strong>IBM Consulting CRM Process</strong></td><td>End-to-end consulting delivery process including Obtain Staff (5.3)</td><td><span class="pill pill-orange">SubK Hire</span></td><td><a href="https://w3.ibm.com/w3publisher/ibm-consulting-crm-process/ibm-consulting-crm-process/5-initiate-project-delivery/5-3-obtain-staff" target="_blank">CRM Process 5.3</a></td><td>Covers internal and external subcontractors, cross-border conditions, ICA framework.</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">All links point to IBM internal W3 Publisher pages. IBM VPN connection required. Content sourced from W3 Publisher searches conducted in 2025.</p>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

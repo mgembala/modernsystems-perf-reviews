@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IBM ModernSystems · Performance Reviews</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 44px 48px 40px; width: 100%; max-width: 440px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+  .ibm-logo  { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: #161616; margin-bottom: 6px; }
+  .app-title { font-size: 15px; font-weight: 600; color: #1f2328; margin-bottom: 2px; }
+  .app-sub   { font-size: 12px; color: #57606a; margin-bottom: 32px; }
+
+  .welcome-box { background: #f0f4ff; border: 1px solid #c7d2fe; border-radius: 6px; padding: 14px 18px; margin-bottom: 28px; }
+  .welcome-name { font-size: 16px; font-weight: 700; color: #1f2328; margin-bottom: 2px; }
+  .welcome-sub  { font-size: 12px; color: #57606a; }
+
+  .enter-btn { width: 100%; background: #0f62fe; color: #fff; border: none; border-radius: 4px; padding: 13px 0; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .enter-btn:hover { background: #0050e6; }
+
+  .error-box { background: #fff1f0; border: 1px solid #fca5a5; border-radius: 6px; padding: 14px 18px; text-align: center; }
+  .error-title { font-size: 14px; font-weight: 600; color: #991b1b; margin-bottom: 4px; }
+  .error-sub   { font-size: 12px; color: #7f1d1d; }
+
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0 16px; }
+  .footer  { font-size: 11px; color: #8d8d8d; text-align: center; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ibm-logo">IBM</div>
+  <div class="app-title">ModernSystems · 2026 Performance Reviews</div>
+  <div class="app-sub">Manager rating tool</div>
+
+  <div id="content"></div>
+
+  <hr class="divider"/>
+  <div class="footer">IBM ModernSystems · 2026 Performance Cycle<br/>For access issues contact your HR Business Partner.</div>
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+  const manager = getManagerFromToken();
+  const content = document.getElementById("content");
+
+  if (manager) {
+    const firstName = manager.name.includes(",")
+      ? manager.name.split(",")[1].trim()
+      : manager.name;
+    const roleLabel = manager.role === "executive" ? "Executive — full org view"
+                    : manager.role === "leader"    ? "Leader — team + sub-teams"
+                    : "Manager — direct reports";
+
+    content.innerHTML = `
+      <div class="welcome-box">
+        <div class="welcome-name">Welcome, ${firstName}</div>
+        <div class="welcome-sub">${roleLabel}</div>
+      </div>
+      <button class="enter-btn" onclick="proceed()">Enter Performance Reviews →</button>`;
+
+    document.title = `IBM · Performance Reviews · ${firstName}`;
+  } else {
+    content.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">Access not recognised</div>
+        <div class="error-sub">Please use the personal link sent to you.<br/>If you need help contact your HR Business Partner.</div>
+      </div>`;
+  }
+
+  function proceed() {
+    const token = new URLSearchParams(window.location.search).get("token");
+    window.location.href = `dashboard.html?token=${token}`;
+  }
+</script>
+</body>
+</html>

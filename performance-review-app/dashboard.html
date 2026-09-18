@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IBM ModernSystems · Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1f2328; }
+
+  .header { background: #161616; color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .ibm-logo { font-size: 20px; font-weight: 700; letter-spacing: -1px; }
+  .header-info { margin-left: 14px; }
+  .header-title { font-size: 14px; font-weight: 600; }
+  .header-sub   { font-size: 11px; color: #8d8d8d; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .refresh-btn  { font-size: 12px; color: #8d8d8d; background: none; border: 1px solid #393939; border-radius: 4px; padding: 5px 12px; cursor: pointer; }
+  .refresh-btn:hover { color: #fff; border-color: #6f6f6f; }
+  .demo-btn     { font-size: 12px; font-weight: 700; color: #161616; background: #f5c842; border: none; border-radius: 4px; padding: 5px 14px; cursor: pointer; }
+  .demo-btn:hover { background: #e6b800; }
+  .demo-banner  { background: #f5c842; color: #161616; text-align: center; font-size: 12px; font-weight: 700; padding: 6px; letter-spacing: .04em; }
+
+  .main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+  .stat-card { flex: 1; min-width: 110px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px 18px; }
+  .stat-val { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-val.blue  { color: #0f62fe; }
+  .stat-val.green { color: #198038; }
+  .stat-val.amber { color: #b45309; }
+  .stat-lbl { font-size: 11px; color: #57606a; }
+
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #57606a; margin: 24px 0 10px; }
+
+  /* ── Team card ── */
+  .team-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .team-card-header { background: #161616; color: #fff; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; }
+  .team-card-title  { font-size: 14px; font-weight: 700; }
+  .team-card-meta   { font-size: 11px; color: #8d8d8d; margin-top: 2px; }
+  .team-card-body   { padding: 14px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  .prog-wrap  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 180px; }
+  .prog-label { font-size: 12px; color: #57606a; white-space: nowrap; }
+  .prog-track { flex: 1; height: 8px; background: #f0f2f5; border-radius: 4px; }
+  .prog-fill  { height: 100%; border-radius: 4px; transition: width .3s; }
+  .prog-pct   { font-size: 12px; font-weight: 700; min-width: 36px; }
+  .prog-pct.green { color: #198038; }
+  .prog-pct.amber { color: #b45309; }
+  .prog-pct.zero  { color: #9ca3af; }
+
+  .emp-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; flex: 1; min-width: 200px; }
+  .emp-chip      { font-size: 11px; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 2px 8px; color: #374151; }
+  .emp-chip.done { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .emp-chip.loa  { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+
+  .rate-btn  { background: #0f62fe; color: #fff; border: none; border-radius: 4px; padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .rate-btn:hover { background: #0050e6; }
+  .rate-btn.done  { background: #198038; }
+  .rate-btn.done:hover { background: #0e6927; }
+
+  /* ── Executive summary block ── */
+  .exec-summary { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 28px; }
+  .exec-header  { background: #0f62fe; color: #fff; padding: 14px 20px; }
+  .exec-title   { font-size: 15px; font-weight: 700; }
+  .exec-sub     { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+  .exec-body    { padding: 20px; }
+
+  .breakdown-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+  .breakdown-item { text-align: center; cursor: pointer; }
+  .breakdown-item:hover .breakdown-lbl { text-decoration: underline; }
+  .breakdown-lbl  { font-size: 10px; font-weight: 700; margin-top: 5px; }
+  .breakdown-cnt  { font-size: 11px; color: #57606a; }
+
+  /* Expanded bucket list */
+  .bucket-list { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 16px; margin-top: 12px; display: none; }
+  .bucket-list.open { display: block; }
+  .bucket-list-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #57606a; margin-bottom: 8px; }
+  .bucket-emp-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; }
+  .bucket-emp-row:last-child { border-bottom: none; }
+  .bucket-emp-name { font-weight: 600; color: #1f2328; }
+  .bucket-emp-meta { font-size: 11px; color: #57606a; }
+  .bucket-emp-mgr  { font-size: 11px; color: #8d8d8d; }
+
+  /* PIP section */
+  .pip-section  { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+  .pip-title    { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #991b1b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .pip-emp-row  { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f0f2f5; align-items: flex-start; }
+  .pip-emp-row:last-child { border-bottom: none; }
+  .pip-emp-name { font-size: 12px; font-weight: 600; min-width: 160px; color: #1f2328; }
+  .pip-emp-mgr  { font-size: 10px; color: #8d8d8d; margin-top: 2px; }
+  .pip-emp-note { font-size: 12px; color: #374151; flex: 1; line-height: 1.5; font-style: italic; }
+  .pip-badge    { font-size: 10px; font-weight: 700; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 8px; white-space: nowrap; }
+
+  /* Notes rollup */
+  .notes-section { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+  .notes-title   { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #57606a; margin-bottom: 10px; }
+  .note-row      { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f2f5; align-items: flex-start; }
+  .note-row:last-child { border-bottom: none; }
+  .note-emp      { font-size: 12px; font-weight: 600; min-width: 160px; color: #1f2328; }
+  .note-mgr      { font-size: 10px; color: #8d8d8d; margin-top: 2px; }
+  .note-text     { font-size: 12px; color: #374151; flex: 1; line-height: 1.5; }
+  .note-rating   { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 8px; white-space: nowrap; margin-top: 2px; }
+  .nr-top     { background: #dcfce7; color: #166534; }
+  .nr-core    { background: #dbeafe; color: #1e40af; }
+  .nr-mixed   { background: #fef9c3; color: #854d0e; }
+  .nr-concern { background: #fee2e2; color: #991b1b; }
+  .nr-hold    { background: #f3f4f6; color: #6b7280; }
+
+  .loading { text-align: center; padding: 60px 20px; color: #57606a; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #0f62fe; border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-banner { background: #fff1f0; border: 1px solid #fca5a5; border-radius: 6px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #991b1b; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;">
+    <div class="ibm-logo">IBM</div>
+    <div class="header-info">
+      <div class="header-title">ModernSystems · 2026 Performance Reviews</div>
+      <div class="header-sub" id="header-sub">Loading…</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="demo-btn"    id="demo-btn"    onclick="toggleDemo()">⚗ Demo Mode</button>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  </div>
+</div>
+
+<div id="demo-banner" class="demo-banner" style="display:none;">⚗ DEMO MODE — ratings are simulated and have NOT been saved to Monday.com</div>
+<div class="main" id="main">
+  <div class="loading"><div class="spinner"></div><br/>Loading your team from Monday.com…</div>
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+const TOKEN   = new URLSearchParams(window.location.search).get("token");
+const MANAGER = MANAGER_TOKENS[TOKEN];
+
+let isDemoMode = false;
+
+if (!MANAGER) {
+  document.getElementById("main").innerHTML =
+    `<div class="error-banner">Access not recognised. Please use the personal link sent to you.</div>`;
+} else {
+  loadData();
+}
+
+// ── DEMO MODE ─────────────────────────────────────────────────────────────────
+const DEMO_OUTCOMES = ["Met", "Met", "Met", "Met", "Not Met"];
+const DEMO_RATINGS  = ["Top", "Top", "Core", "Core", "Core", "Low", "Performance Concern(s)"];
+const DEMO_NOTES    = [
+  "Strong year — exceeded expectations on key delivery milestones.",
+  "Consistently reliable, good team contributor.",
+  "Good technical skills but needs to improve stakeholder communication.",
+  "Missed several sprint commitments in H2. Coaching plan in place.",
+  "On a PIP since Q3. Limited improvement observed.",
+  "",""
+];
+
+function injectDemoRatings(emps) {
+  // Seed with employee index for repeatability — same employee always gets same rating
+  return emps.map((e, i) => {
+    const seed = i % DEMO_RATINGS.length;
+    const oSeed = i % DEMO_OUTCOMES.length;
+    return {
+      ...e,
+      bizOutcomes: DEMO_OUTCOMES[oSeed],
+      skills:      DEMO_OUTCOMES[(oSeed + 1) % DEMO_OUTCOMES.length],
+      behaviors:   DEMO_OUTCOMES[(oSeed + 2) % DEMO_OUTCOMES.length],
+      rating:      DEMO_RATINGS[seed],
+      note:        DEMO_NOTES[seed % DEMO_NOTES.length]
+    };
+  });
+}
+
+function toggleDemo() {
+  isDemoMode = !isDemoMode;
+  const btn    = document.getElementById("demo-btn");
+  const banner = document.getElementById("demo-banner");
+  if (isDemoMode) {
+    btn.textContent    = "✕ Clear Demo";
+    btn.style.background = "#dc2626";
+    btn.style.color    = "#fff";
+    banner.style.display = "block";
+  } else {
+    btn.textContent    = "⚗ Demo Mode";
+    btn.style.background = "";
+    btn.style.color    = "";
+    banner.style.display = "none";
+  }
+  loadData();
+}
+
+async function loadData() {
+  document.getElementById("main").innerHTML =
+    `<div class="loading"><div class="spinner"></div><br/>${isDemoMode ? "Loading demo data…" : "Loading your team from Monday.com…"}</div>`;
+
+  try {
+    let { teams, allMgrs, ownTeam } = await fetchTeamData(MANAGER.name);
+
+    // In demo mode, inject mock ratings + PIP flags into every employee in memory
+    if (isDemoMode) {
+      let di = 0;
+      allMgrs.forEach(m => {
+        teams[m] = (teams[m] || []).map((e, i) => {
+          const seed  = (di + i) % DEMO_RATINGS.length;
+          const oSeed = (di + i) % DEMO_OUTCOMES.length;
+          const note  = DEMO_NOTES[seed % DEMO_NOTES.length];
+          // Every 9th employee is on a PIP in demo mode
+          const pip   = (di + i) % 9 === 0;
+          return {
+            ...e,
+            bizOutcomes: DEMO_OUTCOMES[oSeed],
+            skills:      DEMO_OUTCOMES[(oSeed + 1) % DEMO_OUTCOMES.length],
+            behaviors:   DEMO_OUTCOMES[(oSeed + 2) % DEMO_OUTCOMES.length],
+            rating:      DEMO_RATINGS[seed],
+            pip,
+            note:        pip ? "On PIP — performance improvement plan active since Q3. Monthly check-ins scheduled." : note
+          };
+        });
+        di += (teams[m] || []).length;
+      });
+    }
+
+    const firstName = MANAGER.name.includes(",")
+      ? MANAGER.name.split(",")[1].trim() : MANAGER.name;
+
+    document.getElementById("header-sub").textContent =
+      `${isDemoMode ? "⚗ DEMO · " : ""}Dashboard · ${MANAGER.name}`;
+    document.title = `IBM · Dashboard · ${firstName}`;
+
+    const allEmps     = allMgrs.flatMap(m => teams[m] || []);
+    const totalEmps   = allEmps.length;
+    const totalRated  = allEmps.filter(e => e.bizOutcomes && e.skills && e.behaviors && e.rating).length;
+    const totalRemain = totalEmps - totalRated;
+
+    let html = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-val blue">${allMgrs.length}</div><div class="stat-lbl">Team${allMgrs.length !== 1 ? "s" : ""} to review</div></div>
+        <div class="stat-card"><div class="stat-val">${totalEmps}</div><div class="stat-lbl">Active employees</div></div>
+        <div class="stat-card"><div class="stat-val green">${totalRated}</div><div class="stat-lbl">Rated</div></div>
+        <div class="stat-card"><div class="stat-val ${totalRemain > 0 ? "amber" : "green"}">${totalRemain}</div><div class="stat-lbl">Still to rate</div></div>
+      </div>`;
+
+    // ── Executive / Leader org summary ──────────────────────────────────────
+    const isRollup = (MANAGER.role === "executive" || MANAGER.role === "leader") && allMgrs.length > 1;
+    if (isRollup) {
+      html += renderOrgSummary(allEmps, allMgrs, teams);
+    }
+
+    // ── Own team ──────────────────────────────────────────────────────────
+    if (teams[ownTeam] && teams[ownTeam].length > 0) {
+      html += `<div class="section-title">Your direct reports</div>`;
+      html += renderTeamCard(ownTeam, teams[ownTeam], false);
+    }
+
+    // ── Rollup sub-teams ──────────────────────────────────────────────────
+    const subs = allMgrs.filter(m => m !== ownTeam);
+    if (subs.length) {
+      html += `<div class="section-title">Sub-teams (rollup)</div>`;
+      subs.forEach(m => { html += renderTeamCard(m, teams[m] || [], true); });
+    }
+
+    document.getElementById("main").innerHTML = html;
+
+  } catch(e) {
+    document.getElementById("main").innerHTML =
+      `<div class="error-banner">Failed to load data: ${e.message}<br/><button onclick="loadData()" style="margin-top:8px;padding:6px 14px;cursor:pointer;">Retry</button></div>`;
+  }
+}
+
+// ── ORG SUMMARY (executives & leaders with rollup) ───────────────────────────
+function renderOrgSummary(allEmps, allMgrs, teams) {
+  const orgScore = teamGlassScore(allEmps, null);
+
+  // Bucket employees by score
+  const bucketEmps = { top:[], core:[], mixed:[], concern:[], hold:[], unrated:[] };
+  allEmps.forEach(e => {
+    const s = calcGlassScore(e);
+    if      (s >= 4)   bucketEmps.top.push(e);
+    else if (s >= 3)   bucketEmps.core.push(e);
+    else if (s >= 2)   bucketEmps.mixed.push(e);
+    else if (s >= 1.5) bucketEmps.hold.push(e);
+    else if (s >= 1)   bucketEmps.concern.push(e);
+    else               bucketEmps.unrated.push(e);
+  });
+
+  // PIP employees across all teams
+  const pipEmps = allMgrs.flatMap(m =>
+    (teams[m] || []).filter(e => e.pip).map(e => ({ ...e, teamMgr: m }))
+  );
+
+  // Notes rollup — employees with notes, by manager
+  const notedEmps = allMgrs.flatMap(m =>
+    (teams[m] || []).filter(e => e.note && e.note.trim() && !e.pip).map(e => ({ ...e, teamMgr: m }))
+  );
+
+  // Helper: render a clickable bucket item + hidden expand list
+  function bucketItem(score, labelColor, label, emps) {
+    if (emps.length === 0) return `
+      <div class="breakdown-item" style="opacity:.4;cursor:default;">
+        ${renderGlass(score, 30, 56)}
+        <div class="breakdown-lbl" style="color:${labelColor};">${label}</div>
+        <div class="breakdown-cnt">0 emp</div>
+      </div>`;
+    const id    = `bucket-${label.toLowerCase().replace(/\s/g,"-")}`;
+    const rows  = emps.map(e => {
+      const mgr = Object.keys(teams).find(m => (teams[m]||[]).some(x => x.mondayId === e.mondayId)) || "";
+      return `<div class="bucket-emp-row">
+        <div>
+          <div class="bucket-emp-name">${escHtml(e.name)}</div>
+          <div class="bucket-emp-meta">${escHtml(e.band||"")}${e.band&&e.country?" · ":""}${escHtml(e.country||"")}</div>
+        </div>
+        <div class="bucket-emp-mgr">${escHtml(mgr)}'s team</div>
+      </div>`;
+    }).join("");
+    return `
+      <div class="breakdown-item" onclick="toggleBucket('${id}')">
+        ${renderGlass(score, 30, 56)}
+        <div class="breakdown-lbl" style="color:${labelColor};">${label}</div>
+        <div class="breakdown-cnt">${emps.length} emp ▾</div>
+      </div>
+      <div class="bucket-list" id="${id}">
+        <div class="bucket-list-title">${label} — ${emps.length} employee${emps.length!==1?"s":""}</div>
+        ${rows}
+      </div>`;
+  }
+
+  const pipHtml = pipEmps.length === 0
+    ? `<div style="font-size:12px;color:#9ca3af;">No employees currently flagged on a PIP.</div>`
+    : pipEmps.map(e => `<div class="pip-emp-row">
+        <div>
+          <div class="pip-emp-name">${escHtml(e.name)} <span class="pip-badge">PIP</span></div>
+          <div class="pip-emp-mgr">${escHtml(e.teamMgr)}'s team · ${escHtml(e.rating||"Not rated")}</div>
+        </div>
+        <div class="pip-emp-note">${e.note ? escHtml(e.note) : "<em>No note entered</em>"}</div>
+      </div>`).join("");
+
+  const notesHtml = notedEmps.length === 0
+    ? `<div style="font-size:12px;color:#9ca3af;">No additional notes entered yet.</div>`
+    : notedEmps.map(e => {
+        const score = calcGlassScore(e);
+        let rCls = "nr-hold";
+        if (score >= 4) rCls = "nr-top";
+        else if (score >= 3) rCls = "nr-core";
+        else if (score >= 2) rCls = "nr-mixed";
+        else if (score >= 1) rCls = "nr-concern";
+        return `<div class="note-row">
+          <div>
+            <div class="note-emp">${escHtml(e.name)}</div>
+            <div class="note-mgr">${escHtml(e.teamMgr)}'s team</div>
+            <div class="note-rating ${rCls}" style="margin-top:4px;">${escHtml(e.rating||"Not rated")}</div>
+          </div>
+          <div class="note-text">${escHtml(e.note)}</div>
+        </div>`;
+      }).join("");
+
+  return `
+    <div class="exec-summary">
+      <div class="exec-header">
+        <div class="exec-title">Org Health Summary</div>
+        <div class="exec-sub">${allEmps.length} active employees · ${allMgrs.length} teams · ${pipEmps.length} on PIP</div>
+      </div>
+      <div class="exec-body">
+
+        <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-end;">
+
+          <!-- Big org glass -->
+          <div style="text-align:center;">
+            <div style="font-size:11px;font-weight:600;color:#57606a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Overall Health</div>
+            ${renderGlass(orgScore, 60, 100)}
+          </div>
+
+          <!-- Clickable breakdown glasses -->
+          <div style="flex:1;min-width:280px;">
+            <div style="font-size:11px;font-weight:600;color:#57606a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Click a bucket to see employees ▾</div>
+            <div class="breakdown-row">
+              ${bucketItem(4,   "#16a34a", "Top",        bucketEmps.top)}
+              ${bucketItem(3,   "#1d4ed8", "Core",       bucketEmps.core)}
+              ${bucketItem(2,   "#d97706", "Mixed",      bucketEmps.mixed)}
+              ${bucketItem(1,   "#dc2626", "Concern",    bucketEmps.concern)}
+              ${bucketItem(1.5, "#8d8d8d", "On Hold",   bucketEmps.hold)}
+              ${bucketItem(0,   "#9ca3af", "Not Rated",  bucketEmps.unrated)}
+            </div>
+          </div>
+        </div>
+
+        <!-- PIP section -->
+        <div class="pip-section">
+          <div class="pip-title">🚩 Performance Improvement Plans (${pipEmps.length})</div>
+          ${pipHtml}
+        </div>
+
+        <!-- Notes rollup (excludes PIP employees — their notes show above) -->
+        <div class="notes-section">
+          <div class="notes-title">Manager Notes (${notedEmps.length} employee${notedEmps.length !== 1 ? "s" : ""})</div>
+          ${notesHtml}
+        </div>
+
+      </div>
+    </div>`;
+}
+
+function toggleBucket(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle("open");
+}
+
+// ── TEAM CARD ─────────────────────────────────────────────────────────────────
+function renderTeamCard(mgrName, emps, isRollup) {
+  const count  = emps.length;
+  const rated  = emps.filter(e => e.bizOutcomes && e.skills && e.behaviors && e.rating).length;
+  const pct    = count ? Math.round((rated / count) * 100) : 0;
+  const pctCls = pct === 100 ? "green" : pct > 0 ? "amber" : "zero";
+  const fill   = pct === 100 ? "#198038" : pct > 0 ? "#f59e0b" : "#e5e7eb";
+  const btnLbl = pct === 100 ? "Review →" : pct > 0 ? "Continue →" : "Start rating →";
+  const btnCls = pct === 100 ? "rate-btn done" : "rate-btn";
+  const subtitle = isRollup ? `${mgrName}'s team · rollup` : "Your direct reports";
+
+  const score  = teamGlassScore(emps, null);
+
+  const chips = emps.slice(0, 8).map(e => {
+    const done = e.bizOutcomes && e.skills && e.behaviors && e.rating;
+    const loa  = e.status === "Active_LOA";
+    const cls  = done ? "done" : loa ? "loa" : "";
+    const surname = e.name.split(",")[0];
+    return `<span class="emp-chip ${cls}">${surname}</span>`;
+  }).join("") + (emps.length > 8 ? `<span class="emp-chip">+${emps.length - 8} more</span>` : "");
+
+  const emptyNote = count === 0
+    ? `<div style="font-size:12px;color:#8d8d8d;">No active employees found.</div>` : "";
+
+  // Notes summary for this team
+  const teamNotes = emps.filter(e => e.note && e.note.trim());
+  const notesSnippet = teamNotes.length > 0
+    ? `<div style="margin-top:10px;border-top:1px solid #f0f2f5;padding-top:8px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#57606a;margin-bottom:6px;">Notes (${teamNotes.length})</div>
+        ${teamNotes.map(e => `<div style="display:flex;gap:8px;padding:3px 0;font-size:11px;">
+          <span style="font-weight:600;min-width:130px;color:#1f2328;">${e.name.split(",")[0]}</span>
+          <span style="color:#374151;flex:1;">${escHtml(e.note)}</span>
+        </div>`).join("")}
+      </div>`
+    : "";
+
+  return `
+    <div class="team-card">
+      <div class="team-card-header">
+        <div>
+          <div class="team-card-title">${mgrName}'s Team</div>
+          <div class="team-card-meta">${subtitle} · ${count} employee${count !== 1 ? "s" : ""}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          ${renderGlass(score, 30, 34)}
+          <span style="font-size:12px;color:#8d8d8d;">${rated}/${count} rated</span>
+        </div>
+      </div>
+      <div class="team-card-body">
+        <div style="flex:1;">
+          <div class="prog-wrap">
+            <div class="prog-label">Completion</div>
+            <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${fill};"></div></div>
+            <div class="prog-pct ${pctCls}">${pct}%</div>
+          </div>
+          ${count > 0 ? `<div class="emp-chips">${chips}</div>` : emptyNote}
+          ${notesSnippet}
+        </div>
+        ${count > 0 ? `<button class="${btnCls}" onclick="goToRating('${encodeURIComponent(mgrName)}')">${btnLbl}</button>` : ""}
+      </div>
+    </div>`;
+}
+
+function goToRating(mgrName) {
+  window.location.href = `rating.html?token=${TOKEN}&team=${mgrName}`;
+}
+
+function escHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+</script>
+</body>
+</html>
