@@ -122,7 +122,6 @@ const MANAGER_TOKENS = {
   "hJb2zA8kOr7uL":   { name: "Herbert, Julie",          role: "manager"   },
   "bSd4xC6lPs9vM":   { name: "Bird, Steven",            role: "manager"   },
   "fMn1yG7mQt2wN":   { name: "Farndale, Martin",        role: "manager"   },
-  "fOt3zA5nRu8xP":   { name: "Fotinopoulos, Alexandra", role: "manager"   },
   "mLb6wC2oSv1yQ":   { name: "Milburn, Steven",         role: "manager"   },
   "mPc4xD8pTw3zR":   { name: "Mocanu, Petrica",         role: "manager"   },
   "sMe7yE1qUx4aS":   { name: "Scordos, Michelle",       role: "manager"   },
@@ -148,7 +147,7 @@ const ROLLUP = {
     "Mikellides, Simon",
     "Carpenter, James","Mattay, Mark",
     "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Bird, Steven","Farndale, Martin",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert"
   ],
@@ -162,7 +161,7 @@ const ROLLUP = {
     "Mikellides, Simon",
     "Carpenter, James","Mattay, Mark",
     "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Bird, Steven","Farndale, Martin",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert"
   ],
@@ -175,7 +174,7 @@ const ROLLUP = {
     "Mikellides, Simon",
     "Carpenter, James","Mattay, Mark",
     "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Bird, Steven","Farndale, Martin",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert"
   ],
@@ -190,13 +189,13 @@ const ROLLUP = {
     "Mikellides, Simon",
     "Carpenter, James","Mattay, Mark",
     "True, Victoria",
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Bird, Steven","Farndale, Martin",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert"
   ],
   "Iancu, Valentin":   ["Mocanu, Petrica"],
   "True, Victoria":    [
-    "Bird, Steven","Farndale, Martin","Fotinopoulos, Alexandra",
+    "Bird, Steven","Farndale, Martin",
     "Milburn, Steven","Scordos, Michelle","Thompson, Ronald",
     "VanderReyden, Mike","Young, Robert"
   ],
